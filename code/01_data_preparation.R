@@ -31,7 +31,7 @@ names_ls2 <- paste0("table3.",1:9)
 table_names <- append(names_ls1,names_ls2)
 
 # list of page numbers each table is on
-page_numbers <- c(15,16,16,17,17,18,18,19,19,21,21,22,22,23,24,25,25,26,26,26,27,27,29,30,31,32,33,34,36,37)
+page_numbers <- c(15,16,16,17,17,18,18,19,19,20,21,21,22,22,23,24,25,25,26,26,26,27,27,29,30,31,32,33,34,36,37)
 
 # extract the tables from the pdf file 
 for (i in 1:length(table_names)){
@@ -41,7 +41,8 @@ for (i in 1:length(table_names)){
 
 
 
-
+#---------------
+## Data Cleaning
 
 
 
