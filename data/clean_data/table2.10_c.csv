@@ -1,0 +1,25 @@
+Housing_loss_reason(s),Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents
+Not enough income for housing,695,29,867,31,1562,30
+Unfit/unsafe housing condition,236,10,239,9,475,9
+Building sold or renovated,123,5,144,5,267,5
+Owner moved in,26,1,20,1,46,1
+Landlord/ tenant conflict,330,14,404,15,734,14
+Complaint (e.g. pets/noise/damage),85,4,147,5,232,4
+Left the community,123,5,128,5,251,5
+Conflict with spouse/partner,333,14,372,13,705,14
+Conflict with parent/guardian,159,7,245,9,404,8
+Conflict with other,203,8,227,8,430,8
+Experienced abuse by partner,139,6,126,5,265,5
+Experienced abuse by parent/guardian,40,2,44,2,NA,NA
+Experienced abuse by other,59,2,57,2,116,2
+Death or Departure of family member,116,5,138,5,254,5
+Experienced discrimination,74,3,86,3,160,3
+Physical health issue,184,8,146,5,330,6
+Mental health issue,239,10,305,11,544,11
+Addiction/ substance use issue,480,20,630,23,1110,22
+Hospitilzation or treatment program,90,4,46,2,136,3
+Incarceration (jail or prison),86,4,111,4,197,4
+Other reason,349,15,442,16,791,15
+Respondents,2397,NA,2761,NA,5158,NA
+Don't Know/No Answer,2936,NA,571,NA,3507,NA
+Total,5333,NA,3332,NA,8665,NA

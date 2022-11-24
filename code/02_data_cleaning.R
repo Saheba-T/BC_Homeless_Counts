@@ -8,19 +8,24 @@ library(tidyverse)
 library(here)
 
 
-#--------------
+#------------------
 ## Import raw data 
+
+# get path of current working directory
+prj_dir <- here()
 
 # names of data tables pertaining to all communities
 names_ls1 <- paste0("table2.",1:23)
+
 # names of data tables gathered across communities
 names_ls2 <- paste0("table3.",1:9)
+
 # combine the two lists of names into a single list
 table_names <- append(names_ls1,names_ls2)
 
 # read in from csv files and store raw data into data frames
 for (i in table_names){
-  filename <- paste0("data//raw_data//",i,".csv")
+  filename <- paste0(prj_dir,"/data/raw_data/",i,".csv")
   assign(i,read_csv(filename))
 }
 
@@ -41,9 +46,9 @@ table2.2_c <- table2.2[-c(1,2),-2] %>%
   mutate_at(.vars = vars(starts_with("Percent")),
             .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
   mutate_at(.vars = vars(starts_with("Total")),
-            .funs = list(~ as.numeric(gsub(",","",.))))
-
-table2.2_c[,"year_2018"] <- as.numeric(gsub("%","",table2.2_c[,"year_2018"]))
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(contains("2018")),
+            .funs = list(~ as.numeric(gsub("%","",.)))) 
 
 
 # clean table2.4 - Age
@@ -59,14 +64,14 @@ table2.4_c <- table2.4[-c(1,2),] %>%
   mutate_at(.vars = vars(starts_with("Percent")),
             .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
   mutate_at(.vars = vars(starts_with("Total")),
-            .funs = list(~ as.numeric(gsub(",","",.)))) 
-
-table2.4_c[,"year_2018"] <- as.numeric(gsub("%","",table2.4_c[,"year_2018"]))
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(contains("2018")),
+            .funs = list(~ as.numeric(gsub("%","",.)))) 
 
 
 # clean table2.6 - Racial identity
 table2.6_c <- table2.6[-c(1,8,11),] %>%
-  rename( "Applicable_reason(s)" = "Racial.Identity..more.than",
+  rename( "Racial_identity" = "Racial.Identity..more.than",
           "Total_sheltered" = "X",
           "Percent_sheltered" = "Sheltered",
           "Total_unsheltered" = "X.1",
@@ -84,7 +89,7 @@ table2.6_c[9,1] <- "Black - Canadian/American"
 
 # clean table2.10 - Reasons for Loss of Housing
 table2.10_c <- table2.10[-c(1,7,14,17),] %>%
-  rename( "Applicable_reason(s)" = "Loss.of.Housing...more.than.1",
+  rename( "Housing_loss_reason(s)" = "Loss.of.Housing...more.than.1",
           "Total_sheltered" = "X",
           "Percent_sheltered" = "Sheltered",
           "Total_unsheltered" = "X.1",
@@ -116,7 +121,20 @@ table2.11_c <- table2.11[-c(1,6),] %>%
   mutate_at(.vars = vars(starts_with("Percent")),
             .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
   mutate_at(.vars = vars(starts_with("Total")),
-            .funs = list(~ as.numeric(gsub(",","",.)))) 
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(contains("2018")),
+            .funs = list(~ as.numeric(gsub("%","",.)))) 
 
 table2.11_c[5,1] <- "Learning disability or cognitive impairment"
-table2.11_c[,"year_2018"] <- as.numeric(gsub("%","",table2.11_c[,"year_2018"]))
+
+
+
+#-------------------
+## Save cleaned data frames as csv in clean_data folder
+clean_table_names <- c("table2.2_c","table2.4_c","table2.6_c","table2.10_c","table2.11_c")
+
+for (t in clean_table_names){
+  df <- get(t)
+  filename <- paste0("data/clean_data/",t,".csv")
+  write_csv(df, filename)
+}

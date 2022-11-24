@@ -1,0 +1,9 @@
+Health_condition(s),Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents,year_2018
+Medical condition / illness,1185,47,1218,42,2403,44,44
+Physical disability,963,38,1014,35,1977,36,33
+Mental Health Issue,1209,48,1563,53,2772,51,40
+Addiction,1526,60,2107,72,3633,67,56
+Learning disability or cognitive impairment,611,24,736,25,1347,25,NA
+Respondents,2537,NA,2925,NA,5462,NA,NA
+Don't Know/No Answer,2796,NA,407,NA,3203,NA,NA
+Total,5333,NA,3332,NA,8665,NA,NA
