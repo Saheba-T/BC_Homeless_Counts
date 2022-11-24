@@ -1,0 +1,11 @@
+Number.of.Health,X,Sheltered,X.1,Unsheltered,X.2,Total
+Conditions,#,%,#,%,#,%
+No health concerns,305,12%,268,9%,573,10%
+One health concern,613,24%,688,24%,"1,301",24%
+Two health concerns,620,24%,744,25%,"1,364",25%
+Three health concerns,496,20%,639,22%,"1,135",21%
+Four health concerns,362,14%,385,13%,747,14%
+Five health concerns,141,6%,201,7%,342,6%
+Respondents,"2,537",100%,"2,925",100%,"5,462",100%
+Don't Know/No Answer,"2,796",,407,,"3,203",
+Total,"5,333",,"3,332",,"8,665",
