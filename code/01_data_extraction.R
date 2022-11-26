@@ -40,7 +40,7 @@ for (i in 1:length(table_names)){
   assign(table_names[i],
          extract_areas(pdf_file, page = page_numbers[i], output = "data.frame") 
          %>% as.data.frame())
-}
+}  
 
 
 #---------
