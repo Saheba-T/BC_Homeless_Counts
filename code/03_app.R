@@ -36,7 +36,7 @@ ui <- dashboardPage(
                        valueBoxOutput("percent_unsheltered_card")
                        ),
               fluidRow(
-                tabBox(title = "Place Stayed Night of Survey",
+                tabBox(title = "Where Stayed Night of Count",
                        id = "place_of_stay_tab",
                        height = "250px",
                        tabPanel("Sheltered",tableOutput("place_of_stay_sheltered")),
@@ -185,6 +185,7 @@ server <- function(input, output) {
       pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "Percentage") %>%
       mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
       filter(type == input$homeless_type) %>%
+      arrange(desc(Percentage)) %>%
       slice_max(order_by = Percentage, n = 10) %>%
       mutate(Rank = row_number()) %>%
       select(Rank,Housing_loss_reason,Percentage) 
@@ -246,6 +247,7 @@ server <- function(input, output) {
             axis.text.x = element_blank(),
             legend.position = "none") +
       coord_flip()
+      
     
   })
   

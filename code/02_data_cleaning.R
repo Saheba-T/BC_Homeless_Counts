@@ -138,7 +138,8 @@ table2.10_c[c(6,12,14),1] <- c("Complaint (e.g. pets/noise/damage)",
                                "Experienced abuse by parent/guardian",
                                "Death or Departure of family member")
 
-table2.10_c[12, c("Total_respondents", "Percent_respondents")] <- c(84,2)
+table2.10_c[12, "Total_respondents"] <- 84
+table2.10_c[12,"Percent_respondents"] <- 2
 
 
 # clean table 2.11 - Health Conditions
@@ -161,6 +162,22 @@ table2.11_c <- table2.11[-c(1,6),] %>%
 table2.11_c[5,1] <- "Learning disability or cognitive impairment"
 
 
+# clean table 2.12 - Total # of Health concerns
+table2.12_c <- table2.12[-c(1,8,9,10),] %>%
+  rename("Number_of_conditions" = "Number.of.Health",
+         "Total_sheltered" = "X",
+         "Percent_sheltered" = "Sheltered",
+         "Total_unsheltered" = "X.1",
+         "Percent_unsheltered" = "Unsheltered",
+         "Total_respondents" = "X.2",
+         "Percent_respondents" = "Total") %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate("Number_of_conditions" = 0:5)
+
+
 # clean table 2.15 - Sources of income
 table2.15_c <- table2.15[-c(1,12,14,16),] %>%
   rename("Sources_of_income" = "Sources.of.Income..more",
@@ -178,6 +195,7 @@ table2.15_c <- table2.15[-c(1,12,14,16),] %>%
   mutate_at(.vars = vars(contains("2018")),
             .funs = list(~ as.numeric(gsub("%","",.)))) 
 
+
 table2.15_c[11,1] <- "Disability benefit (e.g. PWD, PPMB)"
 table2.15_c[11,"year_2018"] <- 29
 table2.15_c[12,1] <- "Old Age Security (OAS)/Guaranteed Income Supplement"
@@ -186,7 +204,7 @@ table2.15_c[12,1] <- "Old Age Security (OAS)/Guaranteed Income Supplement"
 #-------------------
 ## Save cleaned data frames as csv in clean_data folder
 clean_table_names <- c("table1_c","table2.2_c","table2.4_c","table2.6_c",
-                       "table2.10_c","table2.11_c", "table2.15_c")
+                       "table2.10_c","table2.11_c","table2.12_c","table2.15_c")
 
 for (t in clean_table_names){
   df <- get(t)
