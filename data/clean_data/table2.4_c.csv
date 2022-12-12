@@ -1,6 +1,6 @@
 Age_groups,Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents,year_2018
-Youth (Under 25 Years)13,206,8,395,13,601,11,15
-Adult (25-54 Years),1704,65,2149,71,3853,69,65
+Youth (Under 25),206,8,395,13,601,11,15
+Adult (25-54),1704,65,2149,71,3853,69,65
 Senior (55+),692,27,473,16,1165,21,20
 Respondents,2602,100,3017,100,5619,100,100
 Don't Know/No Answer,2731,NA,315,NA,3046,NA,NA

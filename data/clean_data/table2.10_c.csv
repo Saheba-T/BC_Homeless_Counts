@@ -1,4 +1,4 @@
-Housing_loss_reason(s),Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents
+Housing_loss_reason,Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents
 Not enough income for housing,695,29,867,31,1562,30
 Unfit/unsafe housing condition,236,10,239,9,475,9
 Building sold or renovated,123,5,144,5,267,5

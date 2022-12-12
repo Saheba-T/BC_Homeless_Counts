@@ -1,4 +1,4 @@
-Health_condition(s),Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents,year_2018
+Health_condition,Total_sheltered,Percent_sheltered,Total_unsheltered,Percent_unsheltered,Total_respondents,Percent_respondents,year_2018
 Medical condition / illness,1185,47,1218,42,2403,44,44
 Physical disability,963,38,1014,35,1977,36,33
 Mental Health Issue,1209,48,1563,53,2772,51,40
