@@ -54,7 +54,7 @@ ui <- dashboardPage(
                        tabPanel("Race",plotOutput("racial_identity_distn"))
                 ),
                 box(uiOutput("homeless_type_selector")),
-                box(tableOutput("housing_loss_top5_table")),
+                box(tableOutput("housing_loss_top10_table")),
                 box(plotOutput("source_of_income_distn"))
                 )
         
@@ -175,18 +175,19 @@ server <- function(input, output) {
   })
   
   
-  output$housing_loss_top5_table <- renderTable({
+  output$housing_loss_top10_table <- renderTable({
     
     df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
     
     df %>%
       slice_head(n = (nrow(df)-3)) %>%
       select("Housing_loss_reason",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
+      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "Percentage") %>%
       mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
       filter(type == input$homeless_type) %>%
-      slice_max(order_by = percentage, n = 5) %>%
-      select(-type)
+      slice_max(order_by = Percentage, n = 10) %>%
+      mutate(Rank = row_number()) %>%
+      select(Rank,Housing_loss_reason,Percentage) 
     
   })
   
