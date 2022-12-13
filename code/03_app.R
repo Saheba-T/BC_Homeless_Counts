@@ -42,7 +42,11 @@ ui <- dashboardPage(
                        tabPanel("Sheltered",tableOutput("place_of_stay_sheltered")),
                        tabPanel("Unsheltered",tableOutput("place_of_stay_unsheltered"))
                        ),
-                box(plotOutput("health_condition_distn"))
+                tabBox(title = "Health Related Info",
+                       id = "health_info_tab",
+                       tabPanel("Health Concerns",plotOutput("health_condition_distn")),
+                       tabPanel("Number of Health Concerns", plotOutput("num_health_conditions_distn"))
+                       )
                 
                 ),
               fluidRow(
@@ -276,7 +280,7 @@ server <- function(input, output) {
             axis.text.y = element_text(face = "bold", size = 11),
             axis.text.x = element_blank(),
             legend.position = "none",
-            aspect.ratio = 1/3) +
+            aspect.ratio = 1/2) +
       coord_flip()
     
   })
@@ -341,7 +345,31 @@ server <- function(input, output) {
   })
   
     
-    
+   output$num_health_conditions_distn <- renderPlot({
+     
+     df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
+     
+     df %>%
+       select("Number_of_conditions",contains("Percent")) %>%
+       pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
+       mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+       filter(type == input$homeless_type) %>%
+       ggplot(aes(x = factor(Number_of_conditions), y = percentage)) +
+       geom_bar(stat = "identity") +
+       geom_text(aes(label = paste(percentage,"%", sep = "")), 
+                 position = position_stack(vjust = 0.5), 
+                 col = "white", 
+                 fontface = "bold") +
+       scale_x_discrete(labels = c("None","One","Two","Three","Four","Five")) +
+       theme(line = element_blank(),
+             panel.background = element_blank(),
+             axis.title = element_blank(),
+             axis.text.x = element_text(face = "bold", size = 11),
+             axis.text.y = element_blank(),
+             legend.position = "none",
+             aspect.ratio = 1/2) 
+     
+   }) 
  
   
   # By communities tab --------------------------------------------------------
