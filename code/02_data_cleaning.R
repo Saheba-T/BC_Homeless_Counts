@@ -201,6 +201,46 @@ table2.15_c[11,"year_2018"] <- 29
 table2.15_c[12,1] <- "Old Age Security (OAS)/Guaranteed Income Supplement"
 
 
+# clean table 2.18 - Age when first homeless
+table2.18_c <- table2.18[-c(1,2,6,7,8),] %>%
+  rename("Age" = "X",
+         "Total_sheltered" = "X.1",
+         "Percent_sheltered" = "Sheltered",
+         "Total_unsheltered" = "X.2",
+         "Percent_unsheltered" = "Unsheltered",
+         "Total_respondents" = "X.3",
+         "Percent_respondents" = "Total",
+         "Percent_2018" = "X2018") %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars("Age"),
+            .funs = list(~ gsub("Years","",.)))
+
+
+# clean table 2.17 - length of time without owning a place
+table2.17_c <- table2.17[-c(1,3,9,10,11),] %>%
+  rename("Time_period" = "Length.of.Time.Without",
+         "Total_sheltered" = "X",
+         "Percent_sheltered" = "Sheltered",
+         "Total_unsheltered" = "X.1",
+         "Percent_unsheltered" = "Unsheltered",
+         "Total_respondents" = "X.2",
+         "Percent_respondents" = "Total",
+         "Percent_2018" = "X2018") %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%", "", .)))) %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) 
+
+table2.17_c[2,"Time_period"] <- "under 7 days"
+table2.17_c[2,"Total_respondents"] <- 152
+table2.17_c[2,"Percent_respondents"] <- 3
+table2.17_c[2,"Percent_2018"] <- 3
+  
+
+
 #-------------------
 ## Save cleaned data frames as csv in clean_data folder
 clean_table_names <- c("table1_c","table2.2_c","table2.4_c","table2.6_c",

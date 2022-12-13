@@ -6,7 +6,6 @@
 
 library(tidyverse)
 library(here)
-library(webr)
 library(shiny)
 library(shinydashboard)
 
@@ -36,27 +35,29 @@ ui <- dashboardPage(
                        valueBoxOutput("percent_unsheltered_card")
                        ),
               fluidRow(
-                tabBox(title = "Where Stayed Night of Count",
-                       id = "place_of_stay_tab",
-                       height = "250px",
-                       tabPanel("Sheltered",tableOutput("place_of_stay_sheltered")),
-                       tabPanel("Unsheltered",tableOutput("place_of_stay_unsheltered"))
+                
+                tabBox(title = "Demographics",
+                       id = "demographics_tab",
+                       height = "375px",
+                       tabPanel("Gender",plotOutput("gender_distn")),
+                       tabPanel("Age",plotOutput("age_distn")),
+                       tabPanel("Race",plotOutput("racial_identity_distn"))
                        ),
                 tabBox(title = "Health Related Info",
                        id = "health_info_tab",
+                       height = "375px",
                        tabPanel("Health Concerns",plotOutput("health_condition_distn")),
                        tabPanel("Number of Health Concerns", plotOutput("num_health_conditions_distn"))
                        )
                 
                 ),
               fluidRow(
-                tabBox(title = "Demographics",
-                       id = "demographics_tab",
-                       height = "350px",
-                       tabPanel("Gender",plotOutput("gender_distn")),
-                       tabPanel("Age",plotOutput("age_distn")),
-                       tabPanel("Race",plotOutput("racial_identity_distn"))
-                ),
+                tabBox(title = "Where Stayed Night of Count",
+                       id = "place_of_stay_tab",
+                       height = "300px",
+                       tabPanel("Sheltered",tableOutput("place_of_stay_sheltered")),
+                       tabPanel("Unsheltered",tableOutput("place_of_stay_unsheltered"))
+                       ),
                 box(uiOutput("homeless_type_selector")),
                 box(tableOutput("housing_loss_top10_table")),
                 box(plotOutput("source_of_income_distn"))
@@ -150,7 +151,6 @@ server <- function(input, output) {
   output$gender_distn <- renderPlot({
     
     df <- read_csv(paste0(here(),"/data/clean_data/table2.2_c.csv"))
-    
     df %>% 
       slice_head( n = nrow(df)-3)%>%
       select("Gender_identity",contains("Percent")) %>%
@@ -249,7 +249,8 @@ server <- function(input, output) {
             axis.title = element_blank(),
             axis.text.y = element_text(face = "bold", size = 11),
             axis.text.x = element_blank(),
-            legend.position = "none") +
+            legend.position = "none",
+            aspect.ratio = 1/2) +
       coord_flip()
       
     
@@ -367,7 +368,7 @@ server <- function(input, output) {
              axis.text.x = element_text(face = "bold", size = 11),
              axis.text.y = element_blank(),
              legend.position = "none",
-             aspect.ratio = 1/2) 
+             aspect.ratio = 1/3) 
      
    }) 
  
