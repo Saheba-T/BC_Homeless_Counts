@@ -43,7 +43,7 @@ ui <- dashboardPage(
                        tabPanel("Age",plotOutput("age_distn")),
                        tabPanel("Race",plotOutput("racial_identity_distn"))
                        ),
-                tabBox(title = "Health Related Info",
+                tabBox(title = "Health Conditions",
                        id = "health_info_tab",
                        height = "375px",
                        tabPanel("Health Concerns",plotOutput("health_condition_distn")),
@@ -52,16 +52,25 @@ ui <- dashboardPage(
                 
                 ),
               fluidRow(
+                box(plotOutput("source_of_income_distn")),
+                box(uiOutput("homeless_type_selector")),
                 tabBox(title = "Where Stayed Night of Count",
                        id = "place_of_stay_tab",
                        height = "300px",
                        tabPanel("Sheltered",tableOutput("place_of_stay_sheltered")),
                        tabPanel("Unsheltered",tableOutput("place_of_stay_unsheltered"))
-                       ),
-                box(uiOutput("homeless_type_selector")),
+                       )
+                
+                
+                
+                ),
+              fluidRow(
                 box(tableOutput("housing_loss_top10_table")),
-                box(plotOutput("source_of_income_distn"))
+                tabBox(title = "History",
+                  tabPanel("Age when First Homeless",plotOutput("age_when_first_homeless")),
+                  tabPanel("Time Period as Homeless",plotOutput("homeless_period"))
                 )
+              )
         
               ),
   
@@ -241,7 +250,7 @@ server <- function(input, output) {
       ggplot(aes(x = reorder(Racial_identity,percentage), y = percentage)) +
       geom_bar(stat = "identity", fill = "darkcyan") +
       geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                nudge_y = 2, 
+                nudge_y = 2,
                 col = "black", 
                 fontface = "bold") +
       theme(line = element_blank(),
@@ -300,8 +309,8 @@ server <- function(input, output) {
       ggplot(aes(x = reorder(Sources_of_income,percentage), y = percentage)) +
       geom_bar(stat = "identity", fill = "darkcyan") +
       geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
-                col = "white", 
+                nudge_y = 2, 
+                col = "black", 
                 fontface = "bold") +
       theme(line = element_blank(),
             panel.background = element_blank(),
@@ -372,6 +381,61 @@ server <- function(input, output) {
      
    }) 
  
+  output$age_when_first_homeless <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.18_c.csv"))
+    
+    df %>%
+      select(Age,contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),names_to = "type",values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == c("Sheltered","Unsheltered")) %>% 
+      ggplot(aes(Age, percentage, fill = type)) +
+      geom_col(position = position_dodge()) +
+      geom_text(aes(label = paste0(percentage,"%")),
+                position = position_dodge(0.9),
+                color = "white",
+                fontface = "bold",
+                size = 4.5,
+                vjust = 1.5) +
+      theme(panel.background = element_blank(),
+            axis.title = element_blank(),
+            line = element_blank(),
+            axis.text.x = element_text(face = "bold", size = 11),
+            axis.text.y = element_blank(),
+            legend.position = "right",
+            aspect.ratio = 1.1/1)
+    
+    
+  })
+  
+  
+  output$homeless_period <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.17_c.csv"))
+    
+    df %>%
+      select(Time_period,contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"), names_to = "type",values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == c("Sheltered", "Unsheltered")) %>%
+      ggplot(aes(Time_period, percentage, fill = type)) +
+      geom_col(position = position_dodge()) +
+      geom_text(aes(label = paste0(percentage,"%")),
+                position = position_dodge(0.65),
+                color = "black",
+                fontface = "bold",
+                size = 4,
+                hjust = -0.05) +
+      theme(panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.x = element_blank(),
+            line = element_blank(),
+            legend.position = "bottom") +
+      coord_flip()
+    
+  })
   
   # By communities tab --------------------------------------------------------
   
