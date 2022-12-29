@@ -6,6 +6,7 @@
 # load required libraries
 library(tidyverse)
 library(here)
+library(mapquestr)
 
 
 #------------------
@@ -240,17 +241,72 @@ table2.17_c[2,"Percent_respondents"] <- 3
 table2.17_c[2,"Percent_2018"] <- 3
   
 
+# clean table 3.1 - sheltered and unsheltered homeless
+table3.1_c <- table3.1[-c(1,2,28,29),-7] %>%
+  rename("BC_community" = "X",
+         "Total_Sheltered" = "X.1",
+         "Percent_Sheltered" = "Sheltered",
+         "Total_Unsheltered" = "X.2",
+         "Percent_Unsheltered" = "Unsheltered",
+         "Total_Respondents_2021" = "X.3",
+         "Total_Respondents_2018" = "X.4",
+         "Percent_change" = "X2018") %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%","",.)))) %>%
+  mutate(address = paste(gsub("/.+","",BC_community),
+                         "British Columbia",
+                         "Canada", 
+                         sep = ", ")) 
+
+# data frame of the addresses 
+addresses <- table3.1_c$address
+
+# get coordinates of the different Canadian cities
+geocodes <- geocode_mapquest(addresses = addresses, 
+                             key = my_key) %>% 
+  as.data.frame()
+
+# join geocodes to table_3.1c 
+table3.1_c <- left_join(table3.1_c, geocodes, by = "address")
+
+
+# clean table3.9 - length of time in community
+table3.9_c <- table3.9[-c(1:11,37,38),] %>%
+  separate(X.2, 
+           into = c("Total_1to5","Percent_1to5")) %>%
+  separate(X.3, 
+         into = c("Total_5to10","Percent_5to10")) %>%
+  separate(X.4, 
+           into = c("Total_10plus","Percent_10plus")) %>%
+  separate(X.5, 
+           into = c("Total_Always","Percent_Always")) %>%
+  separate(X.6, 
+           into = c("Total_Respondents","Percent_Respondents")) %>%
+  rename("BC_community" = "X",
+         "Total_Under1" = "X.1",
+         "Percent_Under1" = "Under.1",
+         "Do_Not_Know" = "X.7",
+         "Total_Homeless_Identified" = "X.8") %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%","",.)))) %>%
+  select(- Percent_Respondents)
+
+
 
 #-------------------
 ## Save cleaned data frames as csv in clean_data folder
 clean_table_names <- c("table1_c","table2.2_c","table2.4_c","table2.6_c",
                        "table2.10_c","table2.11_c","table2.12_c","table2.15_c",
-                       "table2.17_c","table2.18_c")
+                       "table2.17_c","table2.18_c","table3.1_c", "table3.9_c")
 
 for (t in clean_table_names){
-  df <- get(t)
   filename <- paste0("data/clean_data/",t,".csv")
   if (!file.exists(filename)){
+    df <- get(t)
     write_csv(df, filename)
   }
   
