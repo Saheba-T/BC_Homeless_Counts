@@ -1,8 +1,4 @@
 
-# Author: Saheba Tegally
-
-# Note: Always set working directory to project directory before running the script
-
 
 library(tidyverse)
 library(here)
@@ -74,7 +70,9 @@ ui <- dashboardPage(
         
               ),
   
-      tabItem(tabName = "by_communities"),
+      tabItem(tabName = "by_communities",
+              box(plotOutput("map_bc_communities"))
+              ),
       
       tabItem(tabName = "about",
               div(includeMarkdown("about.md")))
@@ -437,15 +435,21 @@ server <- function(input, output) {
     
   })
   
+  
   # By communities tab --------------------------------------------------------
   
-  
+  output$map_bc_communities <- renderPlot({
+    
+    
+    
+  })
   
   
   # About page Tab ------------------------------------------------------------
   
   
 }
+
 
 
 
