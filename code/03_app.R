@@ -1,7 +1,7 @@
 
 
 library(tidyverse)
-library(here)
+library(leaflet)
 library(shiny)
 library(shinydashboard)
 
@@ -95,7 +95,7 @@ server <- function(input, output) {
   output$percent_sheltered_card <- renderValueBox({
     
     df_homeless_distn <- 
-      read_csv(paste0(here(),"/data/clean_data/table1_c.csv")) %>%
+      read_csv("data/clean_data/table1_c.csv") %>%
       group_by(Homeless_type) %>%
       summarise(total = sum(Total_homeless))
     
@@ -116,7 +116,7 @@ server <- function(input, output) {
   output$percent_unsheltered_card <- renderValueBox({
     
     df_homeless_distn <- 
-      read_csv(paste0(here(),"/data/clean_data/table1_c.csv")) %>%
+      read_csv("data/clean_data/table1_c.csv") %>%
       group_by(Homeless_type) %>%
       summarise(total = sum(Total_homeless))
     
@@ -135,7 +135,7 @@ server <- function(input, output) {
   
   output$total_homeless_identified <- renderValueBox({
     
-    df_homeless_distn <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+    df_homeless_distn <- read_csv("data/clean_data/table1_c.csv")
     total_homeless <- sum(df_homeless_distn[,"Total_homeless"])
       
     
@@ -157,7 +157,7 @@ server <- function(input, output) {
   
   output$gender_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.2_c.csv"))
+    df <- read_csv("data/clean_data/table2.2_c.csv")
     df %>% 
       slice_head( n = nrow(df)-3)%>%
       select("Gender_identity",contains("Percent")) %>%
@@ -188,7 +188,7 @@ server <- function(input, output) {
   
   output$housing_loss_top10_table <- renderTable({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
+    df <- read_csv("data/clean_data/table2.10_c.csv")
     
     df %>%
       slice_head(n = (nrow(df)-3)) %>%
@@ -206,7 +206,7 @@ server <- function(input, output) {
   
   output$age_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.4_c.csv"))
+    df <- read_csv("data/clean_data/table2.4_c.csv")
     
     df %>% 
       slice_head(n = nrow(df)-3) %>%
@@ -237,7 +237,7 @@ server <- function(input, output) {
   
   output$racial_identity_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.6_c.csv"))
+    df <- read_csv("data/clean_data/table2.6_c.csv")
     
     df %>% 
       slice_head(n = nrow(df)-3) %>%
@@ -266,7 +266,7 @@ server <- function(input, output) {
   
   output$health_condition_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.11_c.csv"))
+    df <- read_csv("data/clean_data/table2.11_c.csv")
     
     df %>% 
       slice_head(n = nrow(df)-3) %>%
@@ -296,7 +296,7 @@ server <- function(input, output) {
   
   output$source_of_income_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.15_c.csv"))
+    df <- read_csv("data/clean_data/table2.15_c.csv")
     
     df %>% 
       slice_head(n = nrow(df)-3) %>%
@@ -323,7 +323,7 @@ server <- function(input, output) {
   
   output$place_of_stay_sheltered <- renderTable({
       
-      df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+      df <- read_csv("data/clean_data/table1_c.csv")
       
       df %>%
         filter(Homeless_type == "Sheltered") %>%
@@ -339,7 +339,7 @@ server <- function(input, output) {
   
   output$place_of_stay_unsheltered <- renderTable({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+    df <- read_csv("data/clean_data/table1_c.csv")
     
     df %>%
       filter(Homeless_type == "Unsheltered") %>%
@@ -355,7 +355,7 @@ server <- function(input, output) {
     
    output$num_health_conditions_distn <- renderPlot({
      
-     df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
+     df <- read_csv("data/clean_data/table2.12_c.csv")
      
      df %>%
        select("Number_of_conditions",contains("Percent")) %>%
@@ -381,7 +381,7 @@ server <- function(input, output) {
  
   output$age_when_first_homeless <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.18_c.csv"))
+    df <- read_csv("data/clean_data/table2.18_c.csv")
     
     df %>%
       select(Age,contains("Percent")) %>%
@@ -410,7 +410,7 @@ server <- function(input, output) {
   
   output$homeless_period <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.17_c.csv"))
+    df <- read_csv("data/clean_data/table2.17_c.csv")
     
     df %>%
       select(Time_period,contains("Percent")) %>%
