@@ -13,9 +13,9 @@ ui <- dashboardPage(
   
   dashboardSidebar(
                    sidebarMenu(
-                     menuItem("All Communities",
+                     menuItem("Provincial Findings",
                               tabName = "all_communities"),
-                     menuItem("By Communities",
+                     menuItem("Summary By Community",
                               tabName = "by_communities"),
                      menuItem("About",
                               tabName = "about")
