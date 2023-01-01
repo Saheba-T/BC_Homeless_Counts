@@ -70,7 +70,9 @@ ui <- dashboardPage(
       ),
       
       tabItem(tabName = "by_communities",
-              box(plotOutput("map_bc_communities"))
+              fluidRow(box(width = 12,leafletOutput("map_bc_communities"))),
+              fluidRow(box(width = 12,tableOutput("time_in_community")))
+              
       ),
       
       tabItem(tabName = "about",

@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(leaflet)
+library(htmltools)
 library(here)
 library(shiny)
 library(shinydashboard)
@@ -10,7 +11,7 @@ library(shinydashboard)
 
 server <- function(input, output, session) {
   
-  # Provincial findings tab ---------------------------------------------------
+  # Provincial Findings tab ---------------------------------------------------
   
   output$percent_sheltered_card <- renderValueBox({
     
@@ -356,16 +357,42 @@ server <- function(input, output, session) {
   })
   
   
-  # By communities tab --------------------------------------------------------
+  # Community Summary tab --------------------------------------------------------
   
-  output$map_bc_communities <- renderPlot({
+  
+  
+  output$map_bc_communities <- renderLeaflet({
+    
+    df <- read_csv(paste0(here(), "/data/clean_data/table3.1_c.csv"))
+    df$labels <- paste("<p>","Community Name: ", df$BC_community,"</p>",
+                       "<p>","Number of homeless identified: ",df$Total_Respondents_2021,"</p>",
+                       "<p>","Change in homeless population from 2018: ",df$Percent_change,"%","</p>")
+    
+    leaflet() %>%
+      setView(lng = -127.6476, lat = 53.7267, zoom = 4.7) %>%
+      addProviderTiles(provider = providers$CartoDB.Voyager) %>%
+      addCircleMarkers(lng = df$lon, 
+                       lat = df$lat,
+                       color = "red",
+                       radius = 5,
+                       weight = 2,
+                       label = lapply(df$labels, HTML))
     
     
     
   })
   
   
-  # About page Tab ------------------------------------------------------------
+  output$time_in_community <- renderTable({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table3.9_c.csv"))
+    
+    df 
+    
+  })
+  
+  
+  
   
   
 }
