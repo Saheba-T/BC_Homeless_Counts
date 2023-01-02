@@ -40,7 +40,7 @@ ui <- dashboardPage(
                        box(plotOutput("age_distn")),
                        box(plotOutput("racial_identity_distn"))
                        ),
-              fluidRow(box(tableOutput("housing_loss_top10_table")),
+              fluidRow(plotOutput("source_of_income_distn"),
                        box(leafletOutput("map_bc_communities"))
                        )
               
@@ -58,7 +58,7 @@ ui <- dashboardPage(
                               )
                        ),
               fluidRow(
-                box(plotOutput("source_of_income_distn"))
+                box(box(tableOutput("housing_loss_top10_table")))
               )
               
       ),
