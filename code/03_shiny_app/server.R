@@ -383,13 +383,6 @@ server <- function(input, output, session) {
   })
   
   
-  output$time_in_community <- renderTable({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table3.9_c.csv"))
-    
-    df 
-    
-  })
   
   
   
