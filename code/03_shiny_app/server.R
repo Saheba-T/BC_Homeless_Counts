@@ -11,7 +11,9 @@ library(shinydashboard)
 
 server <- function(input, output, session) {
   
-  # Provincial Findings tab ---------------------------------------------------
+  #-----------------------------------------------------------------------------
+  # Provincial Findings tab 
+  #-----------------------------------------------------------------------------
   
   output$percent_sheltered_card <- renderValueBox({
     
@@ -64,6 +66,28 @@ server <- function(input, output, session) {
              subtitle = "Total Homeless Identified",
              icon = icon("hashtag"),
              color = "red")
+  })
+  
+  
+  output$map_bc_communities <- renderLeaflet({
+    
+    df <- read_csv(paste0(here(), "/data/clean_data/table3.1_c.csv"))
+    df$labels <- paste("<p>","Community Name: ", df$BC_community,"</p>",
+                       "<p>","Number of homeless identified: ",df$Total_Respondents_2021,"</p>",
+                       "<p>","Change in homeless population from 2018: ",df$Percent_change,"%","</p>")
+    
+    leaflet() %>%
+      setView(lng = -127.6476, lat = 53.7267, zoom = 4.7) %>%
+      addProviderTiles(provider = providers$CartoDB.Voyager) %>%
+      addCircleMarkers(lng = df$lon, 
+                       lat = df$lat,
+                       color = "red",
+                       radius = 5,
+                       weight = 2,
+                       label = lapply(df$labels, HTML))
+    
+    
+    
   })
   
   
@@ -131,25 +155,7 @@ server <- function(input, output, session) {
             axis.title = element_blank()) 
     
   })
-  
-  
-  output$housing_loss_top10_table <- renderTable({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
-    
-    df %>%
-      slice_head(n = (nrow(df)-3)) %>%
-      select("Housing_loss_reason",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "Percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      arrange(desc(Percentage)) %>%
-      slice_max(order_by = Percentage, n = 10) %>%
-      mutate(Rank = row_number()) %>%
-      select(Rank,Housing_loss_reason,Percentage) 
-    
-  })
-  
+
   
   output$racial_identity_distn <- renderPlot({
     
@@ -178,37 +184,7 @@ server <- function(input, output, session) {
     
     
   })
-  
-  
-  output$health_condition_distn <- renderPlot({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.11_c.csv"))
-    
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Health_condition",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Health_condition,percentage), y = percentage)) +
-      geom_bar(stat = "identity",width = 0.5,fill = "darkcyan") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
-                col = "white", 
-                fontface = "bold") +
-      scale_x_discrete(labels = c("Addiction","Learning disability", "Medical Condition",
-                                  "Mental Health Issue", "Physical disability")) +
-      theme(line = element_blank(),
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.text.y = element_text(face = "bold", size = 11),
-            axis.text.x = element_blank(),
-            legend.position = "none",
-            aspect.ratio = 1/2) +
-      coord_flip()
-    
-  })
-  
+
   
   output$source_of_income_distn <- renderPlot({
     
@@ -236,64 +212,28 @@ server <- function(input, output, session) {
     
   })
   
+ 
+  #-----------------------------------------------------------------------------
+  # More Details - Sub1 tab 
+  #-----------------------------------------------------------------------------
   
-  output$place_of_stay_sheltered <- renderTable({
+  output$housing_loss_top10_table <- renderTable({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
     
     df %>%
-      filter(Homeless_type == "Sheltered") %>%
-      select(-Homeless_type) %>%
-      mutate_at(.vars = vars(contains("Percent")),
-                .funs = list(~paste0(.,"%"))) %>%
-      rename("Place_of Stay" = "Sheltered_and_unsheltered",
-             "Total" = "Total_homeless",
-             "Percentage" = "Percent_homeless")
-    
-  })
-  
-  
-  output$place_of_stay_unsheltered <- renderTable({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
-    
-    df %>%
-      filter(Homeless_type == "Unsheltered") %>%
-      mutate_at(.vars = vars(contains("Percent")),
-                .funs = list(~paste0(.,"%"))) %>%
-      select(-Homeless_type) %>%
-      rename("Place of Stay" = "Sheltered_and_unsheltered",
-             "Total" = "Total_homeless",
-             "Percentage" = "Percent_homeless")
-    
-  })
-  
-  
-  output$num_health_conditions_distn <- renderPlot({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
-    
-    df %>%
-      select("Number_of_conditions",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
+      slice_head(n = (nrow(df)-3)) %>%
+      select("Housing_loss_reason",contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "Percentage") %>%
       mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
       filter(type == input$homeless_type) %>%
-      ggplot(aes(x = factor(Number_of_conditions), y = percentage)) +
-      geom_bar(stat = "identity") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
-                col = "white", 
-                fontface = "bold") +
-      scale_x_discrete(labels = c("None","One","Two","Three","Four","Five")) +
-      theme(line = element_blank(),
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.text.x = element_text(face = "bold", size = 11),
-            axis.text.y = element_blank(),
-            legend.position = "none",
-            aspect.ratio = 1/3) 
+      arrange(desc(Percentage)) %>%
+      slice_max(order_by = Percentage, n = 10) %>%
+      mutate(Rank = row_number()) %>%
+      select(Rank,Housing_loss_reason,Percentage) 
     
-  }) 
+  })
+  
   
   output$age_when_first_homeless <- renderPlot({
     
@@ -352,36 +292,128 @@ server <- function(input, output, session) {
   })
   
   
-  # Community Summary tab --------------------------------------------------------
-  
-  
-  
-  output$map_bc_communities <- renderLeaflet({
+  output$place_of_stay_sheltered <- renderTable({
     
-    df <- read_csv(paste0(here(), "/data/clean_data/table3.1_c.csv"))
-    df$labels <- paste("<p>","Community Name: ", df$BC_community,"</p>",
-                       "<p>","Number of homeless identified: ",df$Total_Respondents_2021,"</p>",
-                       "<p>","Change in homeless population from 2018: ",df$Percent_change,"%","</p>")
+    df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
     
-    leaflet() %>%
-      setView(lng = -127.6476, lat = 53.7267, zoom = 4.7) %>%
-      addProviderTiles(provider = providers$CartoDB.Voyager) %>%
-      addCircleMarkers(lng = df$lon, 
-                       lat = df$lat,
-                       color = "red",
-                       radius = 5,
-                       weight = 2,
-                       label = lapply(df$labels, HTML))
-    
-    
+    df %>%
+      filter(Homeless_type == "Sheltered") %>%
+      select(-Homeless_type) %>%
+      mutate_at(.vars = vars(contains("Percent")),
+                .funs = list(~paste0(.,"%"))) %>%
+      rename("Place_of Stay" = "Sheltered_and_unsheltered",
+             "Total" = "Total_homeless",
+             "Percentage" = "Percent_homeless")
     
   })
   
   
+  output$place_of_stay_unsheltered <- renderTable({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+    
+    df %>%
+      filter(Homeless_type == "Unsheltered") %>%
+      mutate_at(.vars = vars(contains("Percent")),
+                .funs = list(~paste0(.,"%"))) %>%
+      select(-Homeless_type) %>%
+      rename("Place of Stay" = "Sheltered_and_unsheltered",
+             "Total" = "Total_homeless",
+             "Percentage" = "Percent_homeless")
+    
+  })
   
   
+  #-----------------------------------------------------------------------------
+  # More Details - Sub2 tab 
+  #-----------------------------------------------------------------------------
+  
+  output$health_condition_distn <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.11_c.csv"))
+    
+    df %>% 
+      slice_head(n = nrow(df)-3) %>%
+      select("Health_condition",contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == input$homeless_type) %>%
+      ggplot(aes(x = reorder(Health_condition,percentage), y = percentage)) +
+      geom_bar(stat = "identity",width = 0.5,fill = "darkcyan") +
+      geom_text(aes(label = paste(percentage,"%", sep = "")), 
+                position = position_stack(vjust = 0.5), 
+                col = "white", 
+                fontface = "bold") +
+      scale_x_discrete(labels = c("Addiction","Learning disability", "Medical Condition",
+                                  "Mental Health Issue", "Physical disability")) +
+      theme(line = element_blank(),
+            panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.x = element_blank(),
+            legend.position = "none",
+            aspect.ratio = 1/2) +
+      coord_flip()
+    
+  })
   
   
+  output$num_health_conditions_distn <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
+    
+    df %>%
+      select("Number_of_conditions",contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),
+                   names_to = "type", 
+                   values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), 
+                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == input$homeless_type) %>%
+      ggplot(aes(x = factor(Number_of_conditions), y = percentage)) +
+      geom_bar(stat = "identity") +
+      geom_text(aes(label = paste(percentage,"%", sep = "")), 
+                position = position_stack(vjust = 0.5), 
+                col = "white", 
+                fontface = "bold") +
+      scale_x_discrete(labels = c("None","One","Two","Three","Four","Five")) +
+      theme(line = element_blank(),
+            panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.text.x = element_text(face = "bold", size = 11),
+            axis.text.y = element_blank(),
+            legend.position = "none",
+            aspect.ratio = 1/3) 
+    
+  }) 
+  
+  
+  output$services_accessed <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.16_c.csv"))
+    
+    df %>%
+      select(Services_Accessed, contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),
+                   names_to = "type",
+                   values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"),
+                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == input$homeless_type) %>%
+      ggplot(aes(x = reorder(Services_Accessed, percentage), y = percentage)) +
+      geom_bar(stat = "identity") +
+      geom_text(aes(label = paste(percentage,"%", sep = "")), 
+                position = position_stack(vjust = 0.5), 
+                col = "white", 
+                fontface = "bold") +
+      theme(panel.background = element_blank(),
+            line = element_blank(),
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(face = "bold",size = 11),
+            axis.title = element_blank()) +
+      coord_flip()
+    
+  })
   
 }
 

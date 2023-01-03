@@ -77,8 +77,11 @@ ui <- dashboardPage(
       tabItem(tabName = "sub2",
               fluidRow(box(plotOutput("health_condition_distn")),
                        box(plotOutput("num_health_conditions_distn"))
+                       ),
+              fluidRow(box(width = 12,
+                           plotOutput("services_accessed"))
                        )
-              ),
+      ),
       
       tabItem(tabName = "about",
               div(includeMarkdown("about.md")))
