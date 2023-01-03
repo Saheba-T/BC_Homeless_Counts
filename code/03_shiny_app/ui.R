@@ -13,10 +13,10 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       
-      menuItem("General Overview", 
+      menuItem("Basic Overview", 
                tabName = "overview"
                ),
-      menuItem("Further Findings",
+      menuItem("More Details",
                menuSubItem("Sub1", tabName = "sub1"),
                menuSubItem("Sub2",tabName = "sub2" )
                ),
