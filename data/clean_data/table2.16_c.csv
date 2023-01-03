@@ -1,0 +1,14 @@
+Services_Accessed,Total_Sheltered,Percent_Sheltered,Total_Unsheltered,Percent_Unsheltered,Total_Respondents,Percent_Respondents
+Ambulance,850,44,729,36,1579,40
+Emergency room,1142,59,1042,51,2184,55
+Hospital (non-emergency),924,48,828,41,1752,44
+Dental clinic or dentist,464,24,324,16,788,20
+Mental health services,638,33,566,28,1204,31
+Supervised injection site,431,22,575,28,1006,25
+(Other) addiction services,480,25,529,26,1009,26
+Health clinic,929,48,836,41,1765,45
+Food services,1126,59,1307,65,2433,62
+Legal services,520,27,532,26,1052,27
+Employment and financial services,743,39,616,30,1359,34
+Housing services,937,49,671,33,1608,41
+Other services,304,16,376,19,680,17

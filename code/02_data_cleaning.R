@@ -296,12 +296,27 @@ table3.9_c <- table3.9[-c(1:11,37,38),] %>%
   select(- Percent_Respondents)
 
 
+# clean table2.16 - Services accessed in the last 12 months
+table2.16_c <- table2.16[-c(1,15,16,17),] %>%
+  rename("Services_Accessed" = "Services.Accessed..more.than.1",
+         "Total_Sheltered" = "X",
+         "Percent_Sheltered" = "Sheltered",
+         "Total_Unsheltered" = "Unsheltered",
+         "Percent_Unsheltered" = "X.1",
+         "Total_Respondents" = "X.2",
+         "Percent_Respondents" = "Total") %>%
+  mutate_at(.vars = vars(starts_with("Total")),
+            .funs = list(~ as.numeric(gsub(",","",.)))) %>%
+  mutate_at(.vars = vars(starts_with("Percent")),
+            .funs = list(~ as.numeric(gsub("%","",.))))
+
 
 #-------------------
 ## Save cleaned data frames as csv in clean_data folder
 clean_table_names <- c("table1_c","table2.2_c","table2.4_c","table2.6_c",
                        "table2.10_c","table2.11_c","table2.12_c","table2.15_c",
-                       "table2.17_c","table2.18_c","table3.1_c", "table3.9_c")
+                       "table2.17_c","table2.18_c","table3.1_c","table3.9_c",
+                       "table2.16_c")
 
 for (t in clean_table_names){
   filename <- paste0("data/clean_data/",t,".csv")
