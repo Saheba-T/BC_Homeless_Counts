@@ -67,42 +67,68 @@ server <- function(input, output, session) {
   })
   
   
-  output$homeless_type_selector <- renderUI({
-    
-    selectInput(inputId = "homeless_type",
-                label = "Homeless Type",
-                choices = c("Sheltered", "Unsheltered", "Respondents"))
-    
-  })
-  
-  
   output$gender_distn <- renderPlot({
     
     df <- read_csv(paste0(here(),"/data/clean_data/table2.2_c.csv"))
     df %>% 
-      slice_head( n = nrow(df)-3)%>%
+      slice_head(n = nrow(df)-3)%>%
       select("Gender_identity",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      pivot_longer(cols = contains("Percent"),
+                   names_to = "type", 
+                   values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), 
+                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
       filter(type == input$homeless_type) %>%
       arrange(desc("Gender_identity")) %>%
-      ggplot(aes(x = "", y = percentage, fill = Gender_identity)) +
+      ggplot(aes(x = reorder(Gender_identity,-percentage), 
+                 y = percentage, 
+                 fill = Gender_identity)) +
       geom_bar(stat = "identity", width = 1, col = "white") +
-      coord_polar("y", start = 0) +
       scale_fill_brewer(palette = "Dark2") +
       geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
-                col = "white",
+                nudge_y = 2, 
+                col = "black",
                 fontface = "bold") +
-      geom_text(aes(x = 1.8, label = Gender_identity),
-                position = position_stack(vjust = .5),
-                fontface = "bold",
-                size = 4) +
       theme(panel.background = element_blank(),
-            axis.text = element_blank(),
+            axis.text.x = element_text(face = "bold", size = 11),
+            axis.text.y = element_blank(),
             axis.title = element_blank(),
             line = element_blank(),
             legend.position = "none") 
+    
+  })
+  
+  
+  output$age_distn <- renderPlot({
+    
+    df <- read_csv(paste0(here(),"/data/clean_data/table2.4_c.csv"))
+    
+    df %>% 
+      slice_head(n = nrow(df)-3) %>%
+      select("Age_groups",contains("Percent")) %>%
+      pivot_longer(cols = contains("Percent"),
+                   names_to = "type", 
+                   values_to = "percentage") %>%
+      mutate_at(.vars = vars("type"), 
+                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
+      filter(type == input$homeless_type) %>%
+      ggplot(aes(x = reorder(Age_groups,-percentage),
+                 y = percentage, 
+                 fill = Age_groups)) +
+      geom_bar(stat = "identity",
+               width = 1, 
+               color = "white") +
+      scale_fill_brewer(palette = "Dark2") +
+      geom_text(aes(label = paste(percentage,"%", sep = "")),
+                nudge_y = 2, 
+                col = "black",
+                fontface = "bold") +
+      theme(legend.position = "none",
+            panel.background = element_blank(),
+            axis.text.x = element_text(face = "bold", size = 11),
+            axis.text.y = element_blank(),
+            line = element_blank(),
+            axis.title = element_blank()) 
     
   })
   
@@ -121,37 +147,6 @@ server <- function(input, output, session) {
       slice_max(order_by = Percentage, n = 10) %>%
       mutate(Rank = row_number()) %>%
       select(Rank,Housing_loss_reason,Percentage) 
-    
-  })
-  
-  
-  output$age_distn <- renderPlot({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.4_c.csv"))
-    
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Age_groups",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x="",y=percentage, fill = Age_groups)) +
-      geom_bar(stat = "identity",width = 1, color = "white") +
-      coord_polar("y", start = 0) +
-      scale_fill_brewer(palette = "Dark2") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")),
-                position = position_stack(vjust = 0.5), 
-                col = "white",
-                fontface = "bold") +
-      geom_text(aes(x = 1.8, label = Age_groups),
-                position = position_stack(vjust = .5),
-                fontface = "bold",
-                size = 4) +
-      theme(legend.position = "none",
-            panel.background = element_blank(),
-            axis.text = element_blank(),
-            line = element_blank(),
-            axis.title = element_blank()) 
     
   })
   

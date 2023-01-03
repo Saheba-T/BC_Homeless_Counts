@@ -36,13 +36,24 @@ ui <- dashboardPage(
                        valueBoxOutput("percent_sheltered_card"),
                        valueBoxOutput("percent_unsheltered_card")
                        ),
-              fluidRow(box(plotOutput("gender_distn")),
-                       box(plotOutput("age_distn")),
-                       box(plotOutput("racial_identity_distn"))
-                       ),
-              fluidRow(plotOutput("source_of_income_distn"),
-                       box(leafletOutput("map_bc_communities"))
+              fluidRow(
+                column(width = 12,
+                       leafletOutput("map_bc_communities")
                        )
+                ),
+              fluidRow(
+                column(width = 3,
+                       plotOutput("gender_distn")
+                       ),
+                column(width = 3,
+                       plotOutput("age_distn")
+                       ),
+                column(width = 6,
+                       plotOutput("racial_identity_distn")
+                       )
+                ),
+              
+              fluidRow(plotOutput("source_of_income_distn"))
               
       ),
       
