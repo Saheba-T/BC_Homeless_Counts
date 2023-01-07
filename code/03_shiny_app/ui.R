@@ -1,11 +1,5 @@
+# this file defines the UI of the shiny app
 
-#
-
-library(tidyverse)
-library(leaflet)
-library(here)
-library(shiny)
-library(shinydashboard)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Homelessness in B.C."),

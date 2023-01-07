@@ -1,12 +1,4 @@
-
-
-library(tidyverse)
-library(leaflet)
-library(htmltools)
-library(here)
-library(shiny)
-library(shinydashboard)
-
+# this file defines the Server of the shiny app
 
 
 server <- function(input, output, session) {
@@ -90,7 +82,6 @@ server <- function(input, output, session) {
     
   })
   
-  
   output$gender_distn <- renderPlot({
     
     df <- read_csv(paste0(here(),"/data/clean_data/table2.2_c.csv"))
@@ -121,6 +112,7 @@ server <- function(input, output, session) {
             legend.position = "none") 
     
   })
+  
   
   
   output$age_distn <- renderPlot({
