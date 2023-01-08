@@ -1,4 +1,4 @@
-# this file defines the Server of the shiny app
+# This file defines the Server of the shiny app
 
 
 server <- function(input, output, session) {
@@ -9,8 +9,7 @@ server <- function(input, output, session) {
   
   output$percent_sheltered_card <- renderValueBox({
     
-    df_homeless_distn <- 
-      read_csv(paste0(here(),"/data/clean_data/table1_c.csv")) %>%
+    df_homeless_distn <- my_data[[1]] %>%
       group_by(Homeless_type) %>%
       summarise(total = sum(Total_homeless))
     
@@ -18,7 +17,6 @@ server <- function(input, output, session) {
                                  filter(Homeless_type == "Sheltered") %>%
                                  select(total)*100/sum(df_homeless_distn[,"total"]),
                                0)
-    
     
     valueBox(value = percent_sheltered,
              subtitle = "Percentage Sheltered",
@@ -30,8 +28,7 @@ server <- function(input, output, session) {
   
   output$percent_unsheltered_card <- renderValueBox({
     
-    df_homeless_distn <- 
-      read_csv(paste0(here(),"/data/clean_data/table1_c.csv")) %>%
+    df_homeless_distn <- my_data[[1]] %>%
       group_by(Homeless_type) %>%
       summarise(total = sum(Total_homeless))
     
@@ -50,9 +47,8 @@ server <- function(input, output, session) {
   
   output$total_homeless_identified <- renderValueBox({
     
-    df_homeless_distn <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
+    df_homeless_distn <- my_data[[1]]
     total_homeless <- sum(df_homeless_distn[,"Total_homeless"])
-    
     
     valueBox(value = total_homeless,
              subtitle = "Total Homeless Identified",
@@ -63,7 +59,7 @@ server <- function(input, output, session) {
   
   output$map_bc_communities <- renderLeaflet({
     
-    df <- read_csv(paste0(here(), "/data/clean_data/table3.1_c.csv"))
+    df <- my_data[[12]]
     df$labels <- paste("<p>","Community Name: ", df$BC_community,"</p>",
                        "<p>","Number of homeless identified: ",df$Total_Respondents_2021,"</p>",
                        "<p>","Change in homeless population from 2018: ",df$Percent_change,"%","</p>")
@@ -82,11 +78,12 @@ server <- function(input, output, session) {
     
   })
   
+  
+  
   output$gender_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.2_c.csv"))
-    df %>% 
-      slice_head(n = nrow(df)-3)%>%
+    
+    my_data[[9]] %>% 
       select("Gender_identity",contains("Percent")) %>%
       pivot_longer(cols = contains("Percent"),
                    names_to = "type", 
