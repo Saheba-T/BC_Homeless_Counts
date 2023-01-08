@@ -20,7 +20,7 @@ my_data <- lapply(my_files,read.csv)
 # Functions
 
 # Function to prepare data for visualization
-prep_data <- function(df, subject_var){
+prep_data <- function(df, subject_var, group_vec){
   df %>%
     select(subject_var, contains("Percent") | contains("2018")) %>%
     pivot_longer(cols = - subject_var,
@@ -28,7 +28,8 @@ prep_data <- function(df, subject_var){
                  values_to = "Percentage") %>%
     mutate_at(.vars = vars("Type"),
               .funs = list(~ gsub(".*_","",.))
-              )
+              ) %>%
+    filter(str_to_title(Type) %in% group_vec)
 }
 
 

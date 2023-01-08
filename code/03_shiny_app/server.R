@@ -78,26 +78,34 @@ server <- function(input, output, session) {
     
   })
   
+  # Change groups to filter on
+  # based on whether there is a comparison to 2018
+  groups <- reactive({
+    
+    if (input$comparison_to_2018){
+      c("Respondents","2018")
+    }else{
+      c("Sheltered","Unsheltered")
+    }
+  })
   
+  # Prepare data for gender table
+  df_gender <- reactive({
+    
+    prep_data(my_data[[9]],"Gender_identity", groups()) %>% 
+      arrange(desc("Gender_identity"))
+  })
   
+  # plot bar plot for gender distribution
   output$gender_distn <- renderPlot({
-    
-    
-    my_data[[9]] %>% 
-      select("Gender_identity",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),
-                   names_to = "type", 
-                   values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), 
-                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      arrange(desc("Gender_identity")) %>%
-      ggplot(aes(x = reorder(Gender_identity,-percentage), 
-                 y = percentage, 
+
+      df_gender() %>%
+      ggplot(aes(x = reorder(Gender_identity,-Percentage), 
+                 y = Percentage, 
                  fill = Gender_identity)) +
       geom_bar(stat = "identity", width = 1, col = "white") +
       scale_fill_brewer(palette = "Dark2") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
                 nudge_y = 2, 
                 col = "black",
                 fontface = "bold") +
