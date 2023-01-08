@@ -1,8 +1,8 @@
-# this file defines the UI of the shiny app
+# This file defines the UI of the shiny app
 
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Homelessness in B.C."),
+  dashboardHeader(title = "20/2021 Homeless Counts in B.C."),
   
   dashboardSidebar(
     sidebarMenu(
@@ -16,9 +16,15 @@ ui <- dashboardPage(
                ),
       menuItem("About",
                tabName = "about"),
+      menuItem(h5("Comparison to 2018:"),
+               checkboxInput(inputId = "comparison_to_2018",
+                             label = "Compare", 
+                             value = FALSE)
+               ),
       menuItem(selectInput(inputId = "homeless_type",
                            label = "Homeless Type",
-                           choices = c("Respondents","Sheltered", "Unsheltered")))
+                           choices = c("Respondents","Sheltered", "Unsheltered"))
+               )
     )
   ),
   
