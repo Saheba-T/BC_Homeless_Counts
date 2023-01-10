@@ -7,6 +7,8 @@ library(htmltools)
 library(here)
 library(shiny)
 library(shinydashboard)
+library(gridExtra)
+library(grid)
 
 #-------------------------------------------------------------------------------
 # Load all csv files from clean_data folder into a list of data frames

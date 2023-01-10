@@ -21,8 +21,9 @@ server <- function(input, output, session) {
     valueBox(value = percent_sheltered,
              subtitle = "Percentage Sheltered",
              icon = icon("percent"),
-             color = "blue"
-    )
+             color = "orange"
+             )
+    
   })
   
   
@@ -92,21 +93,25 @@ server <- function(input, output, session) {
   # Prepare data for gender table
   df_gender <- reactive({
     
-    prep_data(my_data[[9]],"Gender_identity", groups()) %>% 
-      arrange(desc("Gender_identity"))
+    prep_data(my_data[[9]],"Gender_identity", groups()) %>%
+      filter(!Gender_identity %in% c("Respondents","Total","Don't Know/No Answer"))
   })
   
-  # plot bar plot for gender distribution
+  # plot side-by-side bar plot for gender distribution
   output$gender_distn <- renderPlot({
 
       df_gender() %>%
+      arrange(desc("Gender_identity")) %>%
       ggplot(aes(x = reorder(Gender_identity,-Percentage), 
                  y = Percentage, 
-                 fill = Gender_identity)) +
-      geom_bar(stat = "identity", width = 1, col = "white") +
-      scale_fill_brewer(palette = "Dark2") +
+                 fill = Type)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_manual(values = c("#023047","#219ebc")) +
       geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                nudge_y = 2, 
+                position = position_dodge(0.9),
+                vjust = -0.5,
                 col = "black",
                 fontface = "bold") +
       theme(panel.background = element_blank(),
@@ -114,106 +119,160 @@ server <- function(input, output, session) {
             axis.text.y = element_blank(),
             axis.title = element_blank(),
             line = element_blank(),
-            legend.position = "none") 
+            legend.position = "bottom"
+            ) 
     
   })
   
+  # Prepare data for age table
+  df_age <- reactive({
+    
+    prep_data(my_data[[10]],"Age_groups", groups()) %>%
+      filter(!Age_groups %in% c("Respondents","Total","Don't Know/No Answer"))
+  })
   
-  
+  # plot side-by-side bar plot for age distribution
   output$age_distn <- renderPlot({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.4_c.csv"))
-    
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Age_groups",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),
-                   names_to = "type", 
-                   values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), 
-                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Age_groups,-percentage),
-                 y = percentage, 
-                 fill = Age_groups)) +
+      df_age() %>%
+      ggplot(aes(x = reorder(Age_groups,-Percentage),
+                 y = Percentage, 
+                 fill = Type)) +
       geom_bar(stat = "identity",
-               width = 1, 
-               color = "white") +
-      scale_fill_brewer(palette = "Dark2") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")),
-                nudge_y = 2, 
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_manual(values = c("#023047","#219ebc")) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                vjust = -0.5,
                 col = "black",
                 fontface = "bold") +
-      theme(legend.position = "none",
+      theme(legend.position = "bottom",
             panel.background = element_blank(),
             axis.text.x = element_text(face = "bold", size = 11),
             axis.text.y = element_blank(),
             line = element_blank(),
-            axis.title = element_blank()) 
+            axis.title = element_blank()
+            ) 
     
   })
 
+  # Prepare data for racial identity table
+  df_race <- reactive({
+    
+    prep_data(my_data[[11]],"Racial_identity", c("Sheltered","Unsheltered")) %>%
+      filter(!Racial_identity %in% c("Respondents","Total","Don't Know/No Answer")) %>%
+      mutate(Racial_identity = as.factor(Racial_identity))
+  })
+  
+  
   
   output$racial_identity_distn <- renderPlot({
-    
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.6_c.csv"))
-    
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Racial_identity",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Racial_identity,percentage), y = percentage)) +
-      geom_bar(stat = "identity", fill = "darkcyan") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                nudge_y = 2,
+
+    plt.group1 <-
+      df_race() %>%
+      filter(str_to_title(Type) == "Unsheltered") %>%
+      ggplot(aes(x = Racial_identity,y = Percentage)) +
+      geom_bar(stat = "identity", fill = "#219ebc", alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                nudge_y = -2.7,
                 col = "black", 
                 fontface = "bold") +
-      theme(line = element_blank(),
+      scale_y_reverse() +
+      coord_flip() +
+      theme(legend.position = 'none',
             panel.background = element_blank(),
             axis.title = element_blank(),
-            axis.text.y = element_text(face = "bold", size = 11),
-            axis.text.x = element_blank(),
-            legend.position = "none",
-            aspect.ratio = 1/2) +
-      coord_flip()
+            axis.ticks = element_blank(), 
+            axis.text = element_blank(),
+            plot.title = element_text(size = 11.5),
+            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
+      
     
+    plt.group2 <-
+      df_race() %>%
+      filter(str_to_title(Type) == "Sheltered") %>%
+      ggplot(aes(x = Racial_identity,y = Percentage)) +
+      geom_bar(stat = "identity", fill = "#023047", alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                nudge_y = 3,
+                col = "black", 
+                fontface = "bold") +
+      coord_flip() +
+      theme(legend.position = 'none',
+            panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.text.x = element_blank(), 
+            axis.text.y = element_text(face = "bold", 
+                                       size = 10, 
+                                       vjust = 0.5, 
+                                       hjust = 0.9),
+            axis.ticks = element_blank(), 
+            plot.title = element_text(size = 11.5),
+            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
+      
+    
+    grid.arrange(plt.group1, plt.group2,
+                 widths=c(0.4, 0.6), ncol=2
+                 )
     
   })
 
   
-  output$source_of_income_distn <- renderPlot({
+  # Prepare data for sources of income table
+  df_income <- reactive({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.15_c.csv"))
-    
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Sources_of_income",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Sources_of_income,percentage), y = percentage)) +
-      geom_bar(stat = "identity", fill = "darkcyan") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                nudge_y = 2, 
-                col = "black", 
-                fontface = "bold") +
-      theme(line = element_blank(),
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.text.y = element_text(face = "bold", size = 11),
-            axis.text.x = element_blank(),
-            legend.position = "none") +
-      coord_flip()
+    prep_data(my_data[[5]], "Sources_of_income", groups()) %>%
+      filter(!Sources_of_income %in% c("Respondents","Total","Don't Know/No Answer")) %>%
+      mutate(Sources_of_income = as.factor(Sources_of_income))
     
   })
   
+  # 
+  output$source_of_income_distn <- renderPlot({
+    # adapted this code from:
+    # https://stackoverflow.com/questions/14680075/simpler-population-pyramid-in-ggplot2
+    
+    df_income() %>%
+    ggplot(aes(x = Sources_of_income, 
+               y = ifelse(test = Type == groups()[1],  yes = -Percentage, no = Percentage), 
+               fill = Type,
+               label=paste(Percentage, "%", sep="")
+           )) +
+      geom_bar(stat = "identity") +
+      geom_text(hjust = ifelse(test = df_income()$Sources_of_income == groups()[1],  yes = 1.1, no = -0.1), 
+                size=3, 
+                colour="black") +
+      # The 1.1 at the end is a buffer so there is space for the labels on each side
+      scale_y_continuous(labels = abs, limits = max(df_income()$Percentage) * c(-1,1) * 1.1) +
+      # Custom colours
+      scale_fill_manual(values=as.vector(c("#023047","#219ebc"))) +
+      # Remove the axis labels and the fill label from the legend - these are unnecessary for a Population Pyramid
+      labs(
+        x = "",
+        y = "",
+        fill=""
+      ) +
+      theme_minimal(base_size=10) +   
+      coord_flip() +
+      # Remove the grid and the scale
+      theme( 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        axis.text.x=element_blank(), 
+        axis.text.y=element_text(size=8),
+        strip.text.x=element_text(size=8),
+        legend.position="bottom",
+        legend.text=element_text(size=8)
+      )
+    
+    
+  })
  
   #-----------------------------------------------------------------------------
   # More Details - Sub1 tab 
   #-----------------------------------------------------------------------------
-  
+  #2
   output$housing_loss_top10_table <- renderTable({
     
     df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
@@ -233,7 +292,7 @@ server <- function(input, output, session) {
   
   
   output$age_when_first_homeless <- renderPlot({
-    
+    #8
     df <- read_csv(paste0(here(),"/data/clean_data/table2.18_c.csv"))
     
     df %>%
@@ -262,7 +321,7 @@ server <- function(input, output, session) {
   
   
   output$homeless_period <- renderPlot({
-    
+    #7
     df <- read_csv(paste0(here(),"/data/clean_data/table2.17_c.csv"))
     
     df %>%
@@ -290,7 +349,7 @@ server <- function(input, output, session) {
   
   
   output$place_of_stay_sheltered <- renderTable({
-    
+    #1
     df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
     
     df %>%
@@ -306,7 +365,7 @@ server <- function(input, output, session) {
   
   
   output$place_of_stay_unsheltered <- renderTable({
-    
+    #1
     df <- read_csv(paste0(here(),"/data/clean_data/table1_c.csv"))
     
     df %>%
@@ -326,7 +385,7 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   
   output$health_condition_distn <- renderPlot({
-    
+    #3
     df <- read_csv(paste0(here(),"/data/clean_data/table2.11_c.csv"))
     
     df %>% 
@@ -356,7 +415,7 @@ server <- function(input, output, session) {
   
   
   output$num_health_conditions_distn <- renderPlot({
-    
+    #4
     df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
     
     df %>%
@@ -386,7 +445,7 @@ server <- function(input, output, session) {
   
   
   output$services_accessed <- renderPlot({
-    
+    #6
     df <- read_csv(paste0(here(),"/data/clean_data/table2.16_c.csv"))
     
     df %>%
