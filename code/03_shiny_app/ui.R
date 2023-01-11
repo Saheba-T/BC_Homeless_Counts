@@ -2,7 +2,7 @@
 
 
 ui <- dashboardPage(
-  dashboardHeader(title = "20/2021 Homeless Counts in B.C."),
+  dashboardHeader(title = "B.C. Homeless Counts"),
   
   dashboardSidebar(
     sidebarMenu(
@@ -37,23 +37,28 @@ ui <- dashboardPage(
                        valueBoxOutput("percent_unsheltered_card")
                        ),
               fluidRow(
-                column(width = 8,
+                column(width = 12,
+                       h4("Map of Participating Communities"),
                        leafletOutput("map_bc_communities")
-                       ),
-                column(width = 4,
-                       plotOutput("gender_distn")
                        )
                 ),
               fluidRow(
-                column(width = 5,
+                column(width = 3,
+                       h4("Age"),
                        plotOutput("age_distn")
                        ),
-                column(width = 7,
+                column(width = 6,
+                       h4("Racial Identity"),
                        plotOutput("racial_identity_distn")
+                       ),
+                column(width = 3,
+                       h4("Gender"),
+                       plotOutput("gender_distn")
                        )
                 ),
               
-              fluidRow(plotOutput("source_of_income_distn"))
+              fluidRow(h4("Source of Income"),
+                       plotOutput("source_of_income_distn"))
               
       ),
       

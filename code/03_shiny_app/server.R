@@ -117,8 +117,8 @@ server <- function(input, output, session) {
       theme(panel.background = element_blank(),
             axis.text.x = element_text(face = "bold", size = 11),
             axis.text.y = element_blank(),
+            axis.ticks.y = element_blank(),
             axis.title = element_blank(),
-            line = element_blank(),
             legend.position = "bottom"
             ) 
     
@@ -151,7 +151,7 @@ server <- function(input, output, session) {
             panel.background = element_blank(),
             axis.text.x = element_text(face = "bold", size = 11),
             axis.text.y = element_blank(),
-            line = element_blank(),
+            axis.ticks.y = element_blank(),
             axis.title = element_blank()
             ) 
     
@@ -166,9 +166,9 @@ server <- function(input, output, session) {
   })
   
   
-  
+  # plot back-to-back bar chart for racial identity distribution
   output$racial_identity_distn <- renderPlot({
-
+    
     plt.group1 <-
       df_race() %>%
       filter(str_to_title(Type) == "Unsheltered") %>%
@@ -187,7 +187,7 @@ server <- function(input, output, session) {
             axis.text = element_blank(),
             plot.title = element_text(size = 11.5),
             plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
-      
+    
     
     plt.group2 <-
       df_race() %>%
@@ -210,14 +210,16 @@ server <- function(input, output, session) {
             axis.ticks = element_blank(), 
             plot.title = element_text(size = 11.5),
             plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
-      
+    
     
     grid.arrange(plt.group1, plt.group2,
                  widths=c(0.4, 0.6), ncol=2
-                 )
+    )
     
   })
 
+  
+  
   
   # Prepare data for sources of income table
   df_income <- reactive({
@@ -228,47 +230,56 @@ server <- function(input, output, session) {
     
   })
   
-  # 
   output$source_of_income_distn <- renderPlot({
-    # adapted this code from:
-    # https://stackoverflow.com/questions/14680075/simpler-population-pyramid-in-ggplot2
     
-    df_income() %>%
-    ggplot(aes(x = Sources_of_income, 
-               y = ifelse(test = Type == groups()[1],  yes = -Percentage, no = Percentage), 
-               fill = Type,
-               label=paste(Percentage, "%", sep="")
-           )) +
-      geom_bar(stat = "identity") +
-      geom_text(hjust = ifelse(test = df_income()$Sources_of_income == groups()[1],  yes = 1.1, no = -0.1), 
-                size=3, 
-                colour="black") +
-      # The 1.1 at the end is a buffer so there is space for the labels on each side
-      scale_y_continuous(labels = abs, limits = max(df_income()$Percentage) * c(-1,1) * 1.1) +
-      # Custom colours
-      scale_fill_manual(values=as.vector(c("#023047","#219ebc"))) +
-      # Remove the axis labels and the fill label from the legend - these are unnecessary for a Population Pyramid
-      labs(
-        x = "",
-        y = "",
-        fill=""
-      ) +
-      theme_minimal(base_size=10) +   
+    plt.group1 <-
+      df_income() %>%
+      filter(str_to_title(Type) == groups()[2]) %>%
+      ggplot(aes(x = Sources_of_income,y = Percentage)) +
+      geom_bar(stat = "identity", fill = "#219ebc", alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                nudge_y = -2.7,
+                col = "black", 
+                fontface = "bold") +
+      scale_y_reverse() +
+      coord_flip() + 
+      theme(legend.position = 'none',
+            panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.ticks= element_blank(),
+            axis.text = element_blank(),
+            plot.title = element_text(size = 11.5),
+            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
+      
+    
+    
+    plt.group2 <-
+      df_income() %>%
+      filter(str_to_title(Type) == groups()[1]) %>%
+      ggplot(aes(x = Sources_of_income,y = Percentage)) +
+      geom_bar(stat = "identity", fill = "#023047", alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                nudge_y = 3,
+                col = "black", 
+                fontface = "bold") +
       coord_flip() +
-      # Remove the grid and the scale
-      theme( 
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        axis.text.x=element_blank(), 
-        axis.text.y=element_text(size=8),
-        strip.text.x=element_text(size=8),
-        legend.position="bottom",
-        legend.text=element_text(size=8)
-      )
+      theme(legend.position = 'none',
+            panel.background = element_blank(),
+            axis.title = element_blank(),
+            axis.text.x = element_blank(), 
+            axis.text.y = element_text(face = "bold", 
+                                       size = 10, 
+                                       vjust = 0.5, 
+                                       hjust = 0.9),
+            axis.ticks = element_blank(), 
+            plot.title = element_text(size = 11.5),
+            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
     
+    
+    grid.arrange(plt.group1, plt.group2,
+                 widths=c(0.4, 0.6), ncol=2)
     
   })
- 
   #-----------------------------------------------------------------------------
   # More Details - Sub1 tab 
   #-----------------------------------------------------------------------------
