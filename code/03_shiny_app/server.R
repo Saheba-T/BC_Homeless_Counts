@@ -395,90 +395,99 @@ server <- function(input, output, session) {
   # More Details - Sub2 tab 
   #-----------------------------------------------------------------------------
   
-  output$health_condition_distn <- renderPlot({
-    #3
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.11_c.csv"))
+  # Prepare data for health condition table
+  df_health_condition <- reactive({
     
-    df %>% 
-      slice_head(n = nrow(df)-3) %>%
-      select("Health_condition",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Health_condition,percentage), y = percentage)) +
-      geom_bar(stat = "identity",width = 0.5,fill = "darkcyan") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
+    prep_data(my_data[[3]],"Health_condition", groups()) %>%
+      filter(!Health_condition %in% c("Respondents","Total","Don't Know/No Answer"))
+  })
+  
+  output$health_condition_distn <- renderPlot({
+    
+    df_health_condition() %>% 
+      ggplot(aes(x = reorder(Health_condition,Percentage), 
+                 y = Percentage,
+                 fill = Type)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                vjust = 0.5,
+                hjust = 1.1,
                 col = "white", 
                 fontface = "bold") +
-      scale_x_discrete(labels = c("Addiction","Learning disability", "Medical Condition",
-                                  "Mental Health Issue", "Physical disability")) +
+      scale_fill_manual(values = c("#023047","#219ebc")) +
+      coord_flip() +
       theme(line = element_blank(),
             panel.background = element_blank(),
             axis.title = element_blank(),
-            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.y = element_text(face = "bold", size = 12),
             axis.text.x = element_blank(),
-            legend.position = "none",
-            aspect.ratio = 1/2) +
-      coord_flip()
+            legend.position = "bottom")
+      
     
   })
   
+  # Prepare data for number of health condition(s) table
+  df_num_health_conditions <- reactive({
+    
+    prep_data(my_data[[4]],"Number_of_conditions", groups()) %>%
+      filter(!Number_of_conditions %in% c("Respondents","Total","Don't Know/No Answer"))
+  })
   
   output$num_health_conditions_distn <- renderPlot({
-    #4
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.12_c.csv"))
     
-    df %>%
-      select("Number_of_conditions",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),
-                   names_to = "type", 
-                   values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), 
-                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = factor(Number_of_conditions), y = percentage)) +
-      geom_bar(stat = "identity") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
+    df_num_health_conditions() %>%
+      ggplot(aes(x = factor(Number_of_conditions), 
+                 y = Percentage,
+                 fill = Type)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                vjust = 1.2,
                 col = "white", 
                 fontface = "bold") +
+      scale_fill_manual(values = c("#023047","#219ebc")) +
       scale_x_discrete(labels = c("None","One","Two","Three","Four","Five")) +
       theme(line = element_blank(),
             panel.background = element_blank(),
             axis.title = element_blank(),
-            axis.text.x = element_text(face = "bold", size = 11),
+            axis.text.x = element_text(face = "bold", size = 12),
             axis.text.y = element_blank(),
-            legend.position = "none",
-            aspect.ratio = 1/3) 
+            legend.position = "bottom") 
     
   }) 
   
+  # Prepare data for services accessed table
+  df_services_accessed <- reactive({
+    
+    prep_data(my_data[[6]],"Services_Accessed", groups()) %>%
+      filter(!Services_Accessed %in% c("Respondents","Total","Don't Know/No Answer"))
+  })
   
   output$services_accessed <- renderPlot({
-    #6
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.16_c.csv"))
     
-    df %>%
-      select(Services_Accessed, contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),
-                   names_to = "type",
-                   values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"),
-                .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      ggplot(aes(x = reorder(Services_Accessed, percentage), y = percentage)) +
-      geom_bar(stat = "identity") +
-      geom_text(aes(label = paste(percentage,"%", sep = "")), 
-                position = position_stack(vjust = 0.5), 
+    df_services_accessed() %>%
+      ggplot(aes(x = reorder(Services_Accessed, Percentage), 
+                 y = Percentage,
+                 fill = Type)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9), 
                 col = "white", 
                 fontface = "bold") +
+      scale_fill_manual(values = c("#023047","#219ebc")) +
+      coord_flip() +
       theme(panel.background = element_blank(),
             line = element_blank(),
             axis.text.x = element_blank(),
             axis.text.y = element_text(face = "bold",size = 11),
-            axis.title = element_blank()) +
-      coord_flip()
+            axis.title = element_blank()) 
     
   })
   
