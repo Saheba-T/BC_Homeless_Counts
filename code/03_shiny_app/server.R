@@ -219,67 +219,40 @@ server <- function(input, output, session) {
   })
 
   
-  
-  
   # Prepare data for sources of income table
   df_income <- reactive({
     
     prep_data(my_data[[5]], "Sources_of_income", groups()) %>%
       filter(!Sources_of_income %in% c("Respondents","Total","Don't Know/No Answer")) %>%
-      mutate(Sources_of_income = as.factor(Sources_of_income))
+      mutate(Sources_of_income = as.factor(Sources_of_income)) %>%
+      pivot_wider(names_from = "Type", values_from = "Percentage") %>%
+      mutate(mydiff = .data[[groups()[1]]] - .data[[groups()[2]]]) %>% 
+      mutate(Sources_of_income = fct_reorder(Sources_of_income, abs(mydiff)))
     
   })
   
   output$source_of_income_distn <- renderPlot({
     
-    plt.group1 <-
-      df_income() %>%
-      filter(str_to_title(Type) == groups()[2]) %>%
-      ggplot(aes(x = Sources_of_income,y = Percentage)) +
-      geom_bar(stat = "identity", fill = "#219ebc", alpha = 0.75) +
-      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                nudge_y = -2.7,
-                col = "black", 
-                fontface = "bold") +
-      scale_y_reverse() +
-      coord_flip() + 
-      theme(legend.position = 'none',
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.ticks= element_blank(),
-            axis.text = element_blank(),
-            plot.title = element_text(size = 11.5),
-            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
-      
-    
-    
-    plt.group2 <-
-      df_income() %>%
-      filter(str_to_title(Type) == groups()[1]) %>%
-      ggplot(aes(x = Sources_of_income,y = Percentage)) +
-      geom_bar(stat = "identity", fill = "#023047", alpha = 0.75) +
-      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                nudge_y = 3,
-                col = "black", 
-                fontface = "bold") +
+    df_income() %>%
+      ggplot() +
+      geom_segment(aes(x = Sources_of_income,
+                       xend = Sources_of_income,
+                       y = .data[[groups()[1]]],
+                       yend = .data[[groups()[2]]]),
+                   color = "darkgrey")+
+      geom_point(aes(x = Sources_of_income, 
+                     y = .data[[groups()[1]]]),
+                 size = 4,
+                 color = "#219ebc") +
+      geom_point(aes(x = Sources_of_income, 
+                     y = .data[[groups()[2]]]), 
+                 size = 4,
+                 color = "#023047") +
       coord_flip() +
-      theme(legend.position = 'none',
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.text.x = element_blank(), 
-            axis.text.y = element_text(face = "bold", 
-                                       size = 10, 
-                                       vjust = 0.5, 
-                                       hjust = 0.9),
-            axis.ticks = element_blank(), 
-            plot.title = element_text(size = 11.5),
-            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
-    
-    
-    grid.arrange(plt.group1, plt.group2,
-                 widths=c(0.4, 0.6), ncol=2)
+      theme(legend.position = "top") 
     
   })
+  
   #-----------------------------------------------------------------------------
   # More Details - Sub1 tab 
   #-----------------------------------------------------------------------------
@@ -464,30 +437,31 @@ server <- function(input, output, session) {
   # Prepare data for services accessed table
   df_services_accessed <- reactive({
     
-    prep_data(my_data[[6]],"Services_Accessed", groups()) %>%
-      filter(!Services_Accessed %in% c("Respondents","Total","Don't Know/No Answer"))
+    prep_data(my_data[[6]],"Services_Accessed", c("Sheltered","Unsheltered")) %>%
+      filter(!Services_Accessed %in% c("Respondents","Total","Don't Know/No Answer")) %>%
+      pivot_wider(names_from = "Type", values_from = "Percentage") %>%
+      mutate(mydiff = Sheltered - Unsheltered) %>% 
+      mutate(Services_Accessed = fct_reorder(Services_Accessed, abs(mydiff)))
+    
   })
   
   output$services_accessed <- renderPlot({
     
     df_services_accessed() %>%
-      ggplot(aes(x = reorder(Services_Accessed, Percentage), 
-                 y = Percentage,
-                 fill = Type)) +
-      geom_bar(stat = "identity",
-               position = position_dodge(),
-               alpha = 0.75) +
-      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                position = position_dodge(0.9), 
-                col = "white", 
-                fontface = "bold") +
-      scale_fill_manual(values = c("#023047","#219ebc")) +
+      ggplot() +
+      geom_segment(aes(x = Services_Accessed,
+                       xend = Services_Accessed,
+                       y = Sheltered,
+                       yend = Unsheltered),
+                   color = "darkgrey")+
+      geom_point(aes(x = Services_Accessed, y = Sheltered),
+                 size = 4,
+                 color = "#219ebc") +
+      geom_point(aes(x = Services_Accessed, y = Unsheltered), 
+                 size = 4,
+                 color = "#023047") +
       coord_flip() +
-      theme(panel.background = element_blank(),
-            line = element_blank(),
-            axis.text.x = element_blank(),
-            axis.text.y = element_text(face = "bold",size = 11),
-            axis.title = element_blank()) 
+      theme(legend.position = "top") 
     
   })
   

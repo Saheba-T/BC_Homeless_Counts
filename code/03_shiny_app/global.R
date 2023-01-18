@@ -29,9 +29,11 @@ prep_data <- function(df, subject_var, group_vec){
                  names_to = "Type",
                  values_to = "Percentage") %>%
     mutate_at(.vars = vars("Type"),
-              .funs = list(~ gsub(".*_","",.))
+              .funs = list(~ str_to_title(gsub(".*_","",.)))
               ) %>%
-    filter(str_to_title(Type) %in% group_vec)
+    filter(Type %in% group_vec) 
 }
 
 
+
+  
