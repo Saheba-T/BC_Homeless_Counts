@@ -297,7 +297,7 @@ table3.9_c <- table3.9[-c(1:11,37,38),] %>%
 
 
 # clean table2.16 - Services accessed in the last 12 months
-table2.16_c <- table2.16[-c(1,15,16,17),] %>%
+table2.16_c <- table2.16[-1,] %>%
   rename("Services_Accessed" = "Services.Accessed..more.than.1",
          "Total_Sheltered" = "X",
          "Percent_Sheltered" = "Sheltered",
