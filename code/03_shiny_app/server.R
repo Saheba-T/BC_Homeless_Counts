@@ -79,22 +79,12 @@ server <- function(input, output, session) {
     
   })
   
-  # Change groups to filter on
-  # based on whether there is a comparison to 2018
-  groups <- reactive({
-    
-    if (input$comparison_to_2018){
-      c("Respondents","2018")
-    }else{
-      c("Sheltered","Unsheltered")
-    }
-  })
   
   # Prepare data for gender table
   df_gender <- reactive({
     
-    prep_data(my_data[[9]],"Gender_identity", groups()) %>%
-      filter(!Gender_identity %in% c("Respondents","Total","Don't Know/No Answer"))
+    prep_data(my_data[[9]],"Gender_identity", input$homeless_type) 
+    
   })
   
   # plot side-by-side bar plot for gender distribution
@@ -104,11 +94,11 @@ server <- function(input, output, session) {
       arrange(desc("Gender_identity")) %>%
       ggplot(aes(x = reorder(Gender_identity,-Percentage), 
                  y = Percentage, 
-                 fill = Type)) +
+                 fill = Colour)) +
       geom_bar(stat = "identity",
                position = position_dodge(),
-               alpha = 0.75) +
-      scale_fill_manual(values = c("#023047","#219ebc")) +
+               alpha = 0.8) +
+      scale_fill_identity() +
       geom_text(aes(label = paste(Percentage,"%", sep = "")), 
                 position = position_dodge(0.9),
                 vjust = -0.5,
@@ -127,8 +117,8 @@ server <- function(input, output, session) {
   # Prepare data for age table
   df_age <- reactive({
     
-    prep_data(my_data[[10]],"Age_groups", groups()) %>%
-      filter(!Age_groups %in% c("Respondents","Total","Don't Know/No Answer"))
+    prep_data(my_data[[10]],"Age_groups", input$homeless_type)
+    
   })
   
   # plot side-by-side bar plot for age distribution
@@ -137,11 +127,11 @@ server <- function(input, output, session) {
       df_age() %>%
       ggplot(aes(x = reorder(Age_groups,-Percentage),
                  y = Percentage, 
-                 fill = Type)) +
+                 fill = Colour)) +
       geom_bar(stat = "identity",
                position = position_dodge(),
                alpha = 0.75) +
-      scale_fill_manual(values = c("#023047","#219ebc")) +
+      scale_fill_identity() +
       geom_text(aes(label = paste(Percentage,"%", sep = "")), 
                 position = position_dodge(0.9),
                 vjust = -0.5,
@@ -160,8 +150,7 @@ server <- function(input, output, session) {
   # Prepare data for racial identity table
   df_race <- reactive({
     
-    prep_data(my_data[[11]],"Racial_identity", c("Sheltered","Unsheltered")) %>%
-      filter(!Racial_identity %in% c("Respondents","Total","Don't Know/No Answer")) %>%
+    prep_data(my_data[[11]],"Racial_identity", input$homeless_type) %>%
       mutate(Racial_identity = as.factor(Racial_identity))
   })
   
@@ -169,52 +158,28 @@ server <- function(input, output, session) {
   # plot back-to-back bar chart for racial identity distribution
   output$racial_identity_distn <- renderPlot({
     
-    plt.group1 <-
-      df_race() %>%
-      filter(str_to_title(Type) == "Unsheltered") %>%
-      ggplot(aes(x = Racial_identity,y = Percentage)) +
-      geom_bar(stat = "identity", fill = "#219ebc", alpha = 0.75) +
+    df_race() %>%
+      ggplot(aes(x = reorder(Racial_identity,Percentage),
+                 y = Percentage, 
+                 fill = Colour)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_identity() +
       geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                nudge_y = -2.7,
-                col = "black", 
-                fontface = "bold") +
-      scale_y_reverse() +
-      coord_flip() +
-      theme(legend.position = 'none',
-            panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.ticks = element_blank(), 
-            axis.text = element_blank(),
-            plot.title = element_text(size = 11.5),
-            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
-    
-    
-    plt.group2 <-
-      df_race() %>%
-      filter(str_to_title(Type) == "Sheltered") %>%
-      ggplot(aes(x = Racial_identity,y = Percentage)) +
-      geom_bar(stat = "identity", fill = "#023047", alpha = 0.75) +
-      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
-                nudge_y = 3,
-                col = "black", 
+                position = position_dodge(0.9),
+                hjust = -0.5,
+                col = "black",
                 fontface = "bold") +
       coord_flip() +
-      theme(legend.position = 'none',
+      theme(legend.position = "bottom",
             panel.background = element_blank(),
-            axis.title = element_blank(),
-            axis.text.x = element_blank(), 
-            axis.text.y = element_text(face = "bold", 
-                                       size = 10, 
-                                       vjust = 0.5, 
-                                       hjust = 0.9),
-            axis.ticks = element_blank(), 
-            plot.title = element_text(size = 11.5),
-            plot.margin=unit(c(0.1,0.2,0.1,-.1),"cm")) 
+            axis.text.x = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.ticks.x = element_blank(),
+            axis.title = element_blank()
+      ) 
     
-    
-    grid.arrange(plt.group1, plt.group2,
-                 widths=c(0.4, 0.6), ncol=2
-    )
     
   })
 
@@ -222,71 +187,88 @@ server <- function(input, output, session) {
   # Prepare data for sources of income table
   df_income <- reactive({
     
-    prep_data(my_data[[5]], "Sources_of_income", groups()) %>%
-      filter(!Sources_of_income %in% c("Respondents","Total","Don't Know/No Answer")) %>%
-      mutate(Sources_of_income = as.factor(Sources_of_income)) %>%
-      pivot_wider(names_from = "Type", values_from = "Percentage") %>%
-      mutate(mydiff = .data[[groups()[1]]] - .data[[groups()[2]]]) %>% 
-      mutate(Sources_of_income = fct_reorder(Sources_of_income, abs(mydiff)))
+    prep_data(my_data[[5]], "Sources_of_income", input$homeless_type) %>%
+      mutate(Sources_of_income = as.factor(Sources_of_income))
     
   })
   
   output$source_of_income_distn <- renderPlot({
     
     df_income() %>%
-      ggplot() +
-      geom_segment(aes(x = Sources_of_income,
-                       xend = Sources_of_income,
-                       y = .data[[groups()[1]]],
-                       yend = .data[[groups()[2]]]),
-                   color = "darkgrey")+
-      geom_point(aes(x = Sources_of_income, 
-                     y = .data[[groups()[1]]]),
-                 size = 4,
-                 color = "#219ebc") +
-      geom_point(aes(x = Sources_of_income, 
-                     y = .data[[groups()[2]]]), 
-                 size = 4,
-                 color = "#023047") +
+      ggplot(aes(x = reorder(Sources_of_income,Percentage),
+                 y = Percentage, 
+                 fill = Colour)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_identity() +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                hjust = -0.5,
+                col = "black",
+                fontface = "bold") +
       coord_flip() +
-      theme(legend.position = "top") 
+      theme(legend.position = "bottom",
+            panel.background = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.title = element_blank()
+      ) 
     
   })
   
   #-----------------------------------------------------------------------------
-  # More Details - Sub1 tab 
+  # More Details - History of Homelessness tab
   #-----------------------------------------------------------------------------
   #2
-  output$housing_loss_top10_table <- renderTable({
+  # Prepare data for housing loss reasons table
+  df_housing_loss <- reactive({
     
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.10_c.csv"))
-    
-    df %>%
-      slice_head(n = (nrow(df)-3)) %>%
-      select("Housing_loss_reason",contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type", values_to = "Percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == input$homeless_type) %>%
-      arrange(desc(Percentage)) %>%
-      slice_max(order_by = Percentage, n = 10) %>%
-      mutate(Rank = row_number()) %>%
-      select(Rank,Housing_loss_reason,Percentage) 
+    prep_data(my_data[[2]], "Housing_loss_reason", input$homeless_type) %>%
+      mutate(Housing_loss_reason = as.factor(Housing_loss_reason))
     
   })
   
+  output$housing_loss <- renderPlot({
+    
+    df_housing_loss() %>%
+      ggplot(aes(x = reorder(Housing_loss_reason,Percentage),
+                 y = Percentage, 
+                 fill = Colour)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_identity() +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                hjust = -0.5,
+                col = "black",
+                fontface = "bold") +
+      coord_flip() +
+      theme(legend.position = "bottom",
+            panel.background = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.title = element_blank())
+    
+  })
+  
+  df_homeless_age <- reactive({
+    
+    prep_data(my_data[[8]], "Age", input$homeless_type) %>%
+      mutate(Age = as.factor(Age))
+    
+  })
   
   output$age_when_first_homeless <- renderPlot({
-    #8
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.18_c.csv"))
     
-    df %>%
-      select(Age,contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"),names_to = "type",values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == c("Sheltered","Unsheltered")) %>% 
-      ggplot(aes(Age, percentage, fill = type)) +
+    df_homeless_age() %>%
+      ggplot(aes(Age, Percentage, fill = Colour)) +
       geom_col(position = position_dodge()) +
-      geom_text(aes(label = paste0(percentage,"%")),
+      scale_fill_identity() +
+      geom_text(aes(label = paste0(Percentage,"%")),
                 position = position_dodge(0.9),
                 color = "white",
                 fontface = "bold",
@@ -303,19 +285,20 @@ server <- function(input, output, session) {
     
   })
   
+  df_homeless_period <- reactive({
+    
+    prep_data(my_data[[7]], "Time_period", input$homeless_type) %>%
+      mutate(Time_period = as.factor(Time_period))
+    
+  })
   
   output$homeless_period <- renderPlot({
-    #7
-    df <- read_csv(paste0(here(),"/data/clean_data/table2.17_c.csv"))
     
-    df %>%
-      select(Time_period,contains("Percent")) %>%
-      pivot_longer(cols = contains("Percent"), names_to = "type",values_to = "percentage") %>%
-      mutate_at(.vars = vars("type"), .funs = list(~ str_to_title(gsub("Percent_","",.)))) %>%
-      filter(type == c("Sheltered", "Unsheltered")) %>%
-      ggplot(aes(Time_period, percentage, fill = type)) +
+    df_homeless_period() %>%
+      ggplot(aes(Time_period, Percentage, fill = Colour)) +
       geom_col(position = position_dodge()) +
-      geom_text(aes(label = paste0(percentage,"%")),
+      scale_fill_identity() +
+      geom_text(aes(label = paste0(Percentage,"%")),
                 position = position_dodge(0.65),
                 color = "black",
                 fontface = "bold",
@@ -365,14 +348,14 @@ server <- function(input, output, session) {
   
   
   #-----------------------------------------------------------------------------
-  # More Details - Sub2 tab 
+  # More Details - Health-Related Info tab 
   #-----------------------------------------------------------------------------
   
   # Prepare data for health condition table
   df_health_condition <- reactive({
     
-    prep_data(my_data[[3]],"Health_condition", groups()) %>%
-      filter(!Health_condition %in% c("Respondents","Total","Don't Know/No Answer"))
+    prep_data(my_data[[3]],"Health_condition",input$homeless_type) 
+    
   })
   
   output$health_condition_distn <- renderPlot({
@@ -380,17 +363,16 @@ server <- function(input, output, session) {
     df_health_condition() %>% 
       ggplot(aes(x = reorder(Health_condition,Percentage), 
                  y = Percentage,
-                 fill = Type)) +
+                 fill = Colour)) +
       geom_bar(stat = "identity",
                position = position_dodge(),
                alpha = 0.75) +
       geom_text(aes(label = paste(Percentage,"%", sep = "")), 
                 position = position_dodge(0.9),
-                vjust = 0.5,
-                hjust = 1.1,
-                col = "white", 
+                hjust = -0.5,
+                col = "black",
                 fontface = "bold") +
-      scale_fill_manual(values = c("#023047","#219ebc")) +
+      scale_fill_identity() +
       coord_flip() +
       theme(line = element_blank(),
             panel.background = element_blank(),
@@ -405,8 +387,7 @@ server <- function(input, output, session) {
   # Prepare data for number of health condition(s) table
   df_num_health_conditions <- reactive({
     
-    prep_data(my_data[[4]],"Number_of_conditions", groups()) %>%
-      filter(!Number_of_conditions %in% c("Respondents","Total","Don't Know/No Answer"))
+    prep_data(my_data[[4]],"Number_of_conditions", input$homeless_type) 
   })
   
   output$num_health_conditions_distn <- renderPlot({
@@ -414,7 +395,7 @@ server <- function(input, output, session) {
     df_num_health_conditions() %>%
       ggplot(aes(x = factor(Number_of_conditions), 
                  y = Percentage,
-                 fill = Type)) +
+                 fill = Colour)) +
       geom_bar(stat = "identity",
                position = position_dodge(),
                alpha = 0.75) +
@@ -423,7 +404,7 @@ server <- function(input, output, session) {
                 vjust = 1.2,
                 col = "white", 
                 fontface = "bold") +
-      scale_fill_manual(values = c("#023047","#219ebc")) +
+      scale_fill_identity() +
       scale_x_discrete(labels = c("None","One","Two","Three","Four","Five")) +
       theme(line = element_blank(),
             panel.background = element_blank(),
@@ -437,31 +418,34 @@ server <- function(input, output, session) {
   # Prepare data for services accessed table
   df_services_accessed <- reactive({
     
-    prep_data(my_data[[6]],"Services_Accessed", c("Sheltered","Unsheltered")) %>%
-      filter(!Services_Accessed %in% c("Respondents","Total","Don't Know/No Answer")) %>%
-      pivot_wider(names_from = "Type", values_from = "Percentage") %>%
-      mutate(mydiff = Sheltered - Unsheltered) %>% 
-      mutate(Services_Accessed = fct_reorder(Services_Accessed, abs(mydiff)))
+    prep_data(my_data[[6]],"Services_Accessed", input$homeless_type) %>%
+      mutate(Services_Accessed = as.factor(Services_Accessed))
     
   })
   
   output$services_accessed <- renderPlot({
     
     df_services_accessed() %>%
-      ggplot() +
-      geom_segment(aes(x = Services_Accessed,
-                       xend = Services_Accessed,
-                       y = Sheltered,
-                       yend = Unsheltered),
-                   color = "darkgrey")+
-      geom_point(aes(x = Services_Accessed, y = Sheltered),
-                 size = 4,
-                 color = "#219ebc") +
-      geom_point(aes(x = Services_Accessed, y = Unsheltered), 
-                 size = 4,
-                 color = "#023047") +
+      ggplot(aes(x = reorder(Services_Accessed,Percentage),
+                 y = Percentage, 
+                 fill = Colour)) +
+      geom_bar(stat = "identity",
+               position = position_dodge(),
+               alpha = 0.75) +
+      scale_fill_identity() +
+      geom_text(aes(label = paste(Percentage,"%", sep = "")), 
+                position = position_dodge(0.9),
+                hjust = -0.5,
+                col = "black",
+                fontface = "bold") +
       coord_flip() +
-      theme(legend.position = "top") 
+      theme(legend.position = "bottom",
+            panel.background = element_blank(),
+            axis.text.y = element_text(face = "bold", size = 11),
+            axis.text.x = element_blank(),
+            axis.ticks.x = element_blank(),
+            axis.title = element_blank()
+      ) 
     
   })
   
