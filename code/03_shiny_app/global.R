@@ -22,18 +22,23 @@ my_data <- lapply(my_files,read.csv)
 # Functions
 
 # Function to prepare data for visualization
-prep_data <- function(df, subject_var, group_vec){
+prep_data <- function(df, subject_var, homeless_type){
   df %>%
     select(subject_var, contains("Percent") | contains("2018")) %>%
-    pivot_longer(cols = - subject_var,
+    pivot_longer(cols = -subject_var,
                  names_to = "Type",
                  values_to = "Percentage") %>%
     mutate_at(.vars = vars("Type"),
               .funs = list(~ str_to_title(gsub(".*_","",.)))
               ) %>%
-    filter(Type %in% group_vec) 
+    mutate(Colour  = case_when(Type == "Sheltered" ~ "#219ebc",
+                               Type == "Unsheltered" ~ "#5F9EA0",
+                               Type == "2018" ~ "black",
+                               TRUE ~ "#4682B4")) %>%
+    filter(Type == homeless_type) %>%
+    filter(!.data[[subject_var]] %in% c("Respondents","Total","Don't Know/No Answer")) %>%
+    mutate(subject_var = factor(subject_var, subject_var))
 }
-
 
 
   
